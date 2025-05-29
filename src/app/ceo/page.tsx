@@ -1,75 +1,22 @@
-// app/ceo/page.tsx
+// ✅ 서버용 비동기 컴포넌트가 아니라 클라이언트 전용이므로 비동기 함수 제거
 "use client";
 
-import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-export default function CEODashboard() {
-  const [form, setForm] = useState({
-    name: "",
-    description: "",
-    address: "",
-  });
+export default function CeoDashboardPageWrapper() {
+  const { data: session, status } = useSession({ required: true });
+  const router = useRouter();
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const res = await fetch("/api/stores", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-
-    if (res.ok) {
-      alert("등록 성공!");
-      setForm({ name: "", description: "", address: "" });
+  useEffect(() => {
+    if (!session?.user) {
+      router.replace("/ceo/login");
+      return;
     } else {
-      alert("에러 발생!");
+      router.replace("/ceo/dashboard");
     }
-  };
+  }, [session]);
 
-  return (
-    <div className="max-w-xl mx-auto py-10">
-      <h1 className="text-2xl font-bold mb-4">📦 매장 등록</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-          placeholder="매장 이름"
-          className="w-full border rounded p-2"
-          required
-        />
-        <textarea
-          name="description"
-          value={form.description}
-          onChange={handleChange}
-          placeholder="매장 설명"
-          className="w-full border rounded p-2"
-          rows={4}
-        />
-        <input
-          type="text"
-          name="address"
-          value={form.address}
-          onChange={handleChange}
-          placeholder="주소"
-          className="w-full border rounded p-2"
-        />
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          등록
-        </button>
-      </form>
-    </div>
-  );
+  return <div>Go to Somewhere</div>;
 }
