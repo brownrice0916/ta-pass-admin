@@ -89,18 +89,18 @@ export default function CEOListPage() {
     {
       header: "상호명",
       accessor: "businessName",
-      render: (row: any) => row.ceoProfile.businessName,
+      render: (row: any) => row?.ceoProfile?.businessName || "정보 없음", // Fallback text if not available
     },
     {
       header: "사업자번호",
       accessor: "businessNumber",
-      render: (row: any) => row.ceoProfile.businessNumber,
+      render: (row: any) => row?.ceoProfile?.businessNumber || "정보 없음",
     },
     {
       header: "승인 상태",
       accessor: "verificationStatus",
       render: (row: any) => {
-        const status = row.ceoProfile.verificationStatus;
+        const status = row?.ceoProfile?.verificationStatus;
         return status === "approved"
           ? "승인됨"
           : status === "rejected"

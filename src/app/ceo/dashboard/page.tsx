@@ -117,18 +117,19 @@ export default function DashBoard() {
         <Card className="w-full">
           <CardContent className="p-4 space-y-4">
             <h2 className="text-lg font-semibold mb-4">최신 리뷰</h2>
-            {reviews.map((review) => (
-              <div key={review.id} className="border-b pb-3">
-                <div className="flex justify-between text-sm text-gray-500">
-                  <span>{review.userName}</span>
-                  <span>{review.createdAt}</span>
+            {reviews &&
+              reviews.map((review) => (
+                <div key={review.id} className="border-b pb-3">
+                  <div className="flex justify-between text-sm text-gray-500">
+                    <span>{review.userName}</span>
+                    <span>{review.createdAt}</span>
+                  </div>
+                  <div className="mt-1 text-base">{review.content}</div>
+                  <div className="text-yellow-500">
+                    ⭐ {review.rating.toFixed(1)}
+                  </div>
                 </div>
-                <div className="mt-1 text-base">{review.content}</div>
-                <div className="text-yellow-500">
-                  ⭐ {review.rating.toFixed(1)}
-                </div>
-              </div>
-            ))}
+              ))}
           </CardContent>
         </Card>
       </div>
