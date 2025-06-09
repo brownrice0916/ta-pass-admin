@@ -1,4 +1,3 @@
-// ✅ 서버용 비동기 컴포넌트가 아니라 클라이언트 전용이므로 비동기 함수 제거
 "use client";
 
 import { useSession } from "next-auth/react";
@@ -6,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { categoryMap, subCategoryMap } from "@/types/category";
 import { FormValues } from "../components/store-form";
+import StoreInfoTable from "./component/store-info-table"; // 스켈레톤 포함 Table
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Stores() {
   const { data: session, status } = useSession({ required: true });
@@ -14,6 +15,7 @@ export default function Stores() {
   const [loading, setLoading] = useState(true);
   const [RestaurantForm, setRestaurantForm] = useState<any>(null);
 
+  // 로그인 체크 및 데이터 패칭
   useEffect(() => {
     if (!session?.user) {
       router.replace("/ceo/login");
@@ -21,14 +23,19 @@ export default function Stores() {
     }
 
     const fetchStore = async () => {
-      const res = await fetch("/api/stores/my");
-      const json = await res.json();
-      console.log("📦 store fetch result:", json); // 👉 요거 추가
+      try {
+        const res = await fetch("/api/stores/my");
+        const json = await res.json();
+        console.log("📦 store fetch result:", json);
 
-      if (json?.store) {
-        setStoreData(json.store);
+        if (json?.store) {
+          setStoreData(json.store);
+        }
+      } catch (err) {
+        console.error("매장 조회 오류:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchStore();
@@ -38,55 +45,25 @@ export default function Stores() {
     );
   }, [session]);
 
-  if (status === "loading" || loading || !RestaurantForm) {
-    return <p>로딩 중...</p>;
+  // ✅ 스켈레톤 UI 렌더
+  if (status === "loading" || !RestaurantForm) {
+    return (
+      <div className="max-w-3xl mx-auto py-10 space-y-4">
+        <Skeleton className="w-40 h-6" />
+        <Skeleton className="w-full h-[400px] rounded-md" />
+      </div>
+    );
   }
 
-  if (!storeData) {
+  // ✅ 매장이 없을 경우 등록 폼 보여주기
+  if (!loading && !storeData) {
     return (
       <RestaurantForm initialData={undefined} submitButtonText="등록하기" />
     );
   }
 
-  const mainCategoryLabel = Object.entries(categoryMap).find(
-    ([, val]) => val === storeData.category
-  )?.[0];
-  const subCategoryLabel = storeData.subCategory
-    ? Object.entries(subCategoryMap[storeData.category] || {}).find(
-        ([, val]) => val === storeData.subCategory
-      )?.[0]
-    : undefined;
-
+  // ✅ 매장 정보 + 로딩 상태 넘기기
   return (
-    <div className="max-w-xl mx-auto py-10 space-y-6">
-      <h1 className="text-2xl font-bold mb-4">내 매장 정보</h1>
-      <div className="bg-white rounded-lg shadow p-6 space-y-2">
-        <p>
-          <strong>상호명:</strong> {storeData.name}
-        </p>
-        <p>
-          <strong>카테고리:</strong> {mainCategoryLabel}{" "}
-          {subCategoryLabel && `> ${subCategoryLabel}`}
-        </p>
-        <p>
-          <strong>주소:</strong> {storeData.address}
-        </p>
-        <p>
-          <strong>영업시간:</strong> {storeData.openingHoursText}
-        </p>
-        <p>
-          <strong>언어:</strong> {storeData.languages?.join(", ")}
-        </p>
-        <p>
-          <strong>소개:</strong> {storeData.description}
-        </p>
-        <button
-          onClick={() => router.push("/ceo/edit")}
-          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          수정하기
-        </button>
-      </div>
-    </div>
+    <StoreInfoTable storeData={storeData} router={router} loading={loading} />
   );
 }

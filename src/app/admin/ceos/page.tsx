@@ -13,6 +13,7 @@ import {
 
 import Image from "next/image";
 import { DataTable } from "@/components/ui/admin/data-table";
+import TableSkeleton from "../component/table-skeleton";
 
 interface CEO {
   id: number;
@@ -30,12 +31,13 @@ interface CEO {
 export default function CEOListPage() {
   const [ceos, setCeos] = useState<CEO[]>([]);
   const [selectedCeo, setSelectedCeo] = useState<CEO | null>(null);
-
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchCeos = async () => {
       const res = await fetch("/api/admin/ceos");
       const data = await res.json();
       setCeos(data);
+      setLoading(false);
     };
     fetchCeos();
   }, []);
@@ -121,9 +123,11 @@ export default function CEOListPage() {
 
   return (
     <Card className="p-6">
-      <h2 className="text-xl font-bold mb-4">CEO 관리</h2>
-      <DataTable columns={columns} data={ceos} />
-
+      {loading ? (
+        <TableSkeleton columns={columns.length} />
+      ) : (
+        <DataTable columns={columns} data={ceos} />
+      )}
       <Dialog open={!!selectedCeo} onOpenChange={() => setSelectedCeo(null)}>
         <DialogContent>
           <DialogHeader>

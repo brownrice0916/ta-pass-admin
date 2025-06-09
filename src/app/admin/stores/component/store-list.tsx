@@ -14,6 +14,7 @@ import { DataTable } from "@/components/ui/admin/data-table";
 
 import RestaurantForm, { FormValues } from "@/app/ceo/components/store-form";
 import ExcelImport from "../../component/excel-import";
+import TableSkeleton from "../../component/table-skeleton";
 
 interface Store {
   id: string;
@@ -51,12 +52,14 @@ interface Store {
 export default function StoreListPage() {
   const [stores, setStores] = useState<Store[]>([]);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStores = async () => {
       const res = await fetch("/api/admin/stores");
       const data = await res.json();
       setStores(data);
+      setLoading(false);
     };
     fetchStores();
   }, []);
@@ -109,8 +112,11 @@ export default function StoreListPage() {
         <h2 className="text-xl font-bold">스토어 목록</h2>
         <ExcelImport /> {/* ✅ 엑셀 업로드 버튼 */}
       </div>
-      <DataTable columns={columns} data={stores} />
-
+      {loading ? (
+        <TableSkeleton columns={columns.length} />
+      ) : (
+        <DataTable columns={columns} data={stores} />
+      )}
       <Dialog
         open={!!selectedStore}
         onOpenChange={() => setSelectedStore(null)}

@@ -1,10 +1,10 @@
-// app/ceo/edit/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { FormValues } from "../components/store-form";
+import { FormValues } from "../../components/store-form";
+import StoreFormSkeleton from "../component/store-form-skeleton";
 
 export default function CeoEditPage() {
   const { data: session, status } = useSession({ required: true });
@@ -31,15 +31,15 @@ export default function CeoEditPage() {
     };
 
     fetchStore();
-    import("../components/store-form").then((mod) =>
+    import("../../components/store-form").then((mod) =>
       setRestaurantForm(() => mod.default)
     );
   }, [session]);
 
   if (status === "loading" || loading || !RestaurantForm) {
-    return <p>로딩 중...</p>;
+    return <StoreFormSkeleton />;
   }
- 
+
   return (
     <RestaurantForm
       initialData={storeData || undefined}

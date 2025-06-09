@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { DataTable } from "@/components/ui/admin/data-table";
+import TableSkeleton from "../component/table-skeleton";
 
 interface User {
   id: number;
@@ -30,12 +31,14 @@ interface User {
 export default function UserListPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUsers = async () => {
       const res = await fetch("/api/admin/users");
       const data = await res.json();
       setUsers(data);
+      setLoading(false);
     };
     fetchUsers();
   }, []);
@@ -62,8 +65,11 @@ export default function UserListPage() {
   return (
     <Card className="p-6">
       <h2 className="text-xl font-bold mb-4">일반 유저 목록</h2>
-      <DataTable columns={columns} data={users} />
-
+      {loading ? (
+        <TableSkeleton columns={columns.length} />
+      ) : (
+        <DataTable columns={columns} data={users} />
+      )}
       <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
         <DialogContent>
           <DialogHeader>

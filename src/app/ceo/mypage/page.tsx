@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { signOut } from "next-auth/react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function MyPage() {
   const [userInfo, setUserInfo] = useState({
@@ -84,7 +85,27 @@ export default function MyPage() {
       <h2 className="text-xl font-bold">내 정보</h2>
 
       {loading ? (
-        <p>로딩 중...</p>
+        <div className="space-y-6">
+          {/* 프로필 사진 Skeleton */}
+          <div className="flex flex-col items-center space-y-2">
+            <Skeleton className="w-24 h-24 rounded-full" />
+          </div>
+
+          {/* 이름 필드 Skeleton */}
+          <div>
+            <Skeleton className="w-20 h-4 mb-2" />
+            <Skeleton className="w-full h-10 rounded" />
+          </div>
+
+          {/* 성별 필드 Skeleton */}
+          <div>
+            <Skeleton className="w-20 h-4 mb-2" />
+            <Skeleton className="w-full h-10 rounded" />
+          </div>
+
+          {/* 저장 버튼 Skeleton */}
+          <Skeleton className="w-full h-10 rounded" />
+        </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* 프사 이미지 */}
@@ -108,7 +129,6 @@ export default function MyPage() {
                 </div>
               )}
             </div>
-            {/* 숨겨진 파일 업로드 input */}
             <input
               type="file"
               accept="image/*"

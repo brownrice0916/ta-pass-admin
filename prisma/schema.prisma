@@ -125,7 +125,7 @@ model Review {
 }
 
 model SerialNumber {
-  id             String    @id
+    id        String   @id @default(cuid()) // 👈 이게 있어야 함
   code           String    @unique
   isUsed         Boolean   @default(false)
   usedAt         DateTime?

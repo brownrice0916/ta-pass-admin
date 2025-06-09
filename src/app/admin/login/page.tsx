@@ -1,9 +1,8 @@
-// app/admin/login/page.tsx
 "use client";
 
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -11,6 +10,14 @@ export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    // 이미 로그인된 경우 대시보드로 강제 이동
+    if (status === "authenticated") {
+      router.replace("/admin/dashboard");
+    }
+  }, [status, session]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,11 +28,16 @@ export default function AdminLoginPage() {
     });
 
     if (res?.ok) {
-      router.push("/admin/dashboard"); // 로그인 후 이동할 곳
+      router.push("/admin/dashboard");
     } else {
       alert("로그인 실패");
     }
   };
+
+  // 세션 로딩 중이면 렌더링 보류
+  if (status === "loading" || status === "authenticated") {
+    return null;
+  }
 
   return (
     <form onSubmit={handleLogin} className="max-w-sm mx-auto mt-20 space-y-4">
@@ -42,6 +54,15 @@ export default function AdminLoginPage() {
       />
       <Button type="submit" className="w-full">
         로그인
+      </Button>
+
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full"
+        onClick={() => router.push("/admin/signup")}
+      >
+        회원가입
       </Button>
     </form>
   );

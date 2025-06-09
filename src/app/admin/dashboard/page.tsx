@@ -10,6 +10,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import AdminDashboardSkeleton from "./component/admin-dashboard-skeleton";
 
 interface DashboardData {
   totalUsers: number;
@@ -33,7 +34,7 @@ export default function AdminDashboardPage() {
     fetchDashboard();
   }, []);
 
-  if (!data) return <div className="p-6">로딩 중...</div>;
+  if (!data) return <AdminDashboardSkeleton />;
 
   return (
     <div className="p-6 space-y-6">
@@ -49,7 +50,9 @@ export default function AdminDashboardPage() {
 
       {/* 시리얼 사용량 그래프 */}
       <div>
-        <h2 className="text-xl font-semibold mb-2">최근 7일 시리얼 사용량</h2>
+        <h2 className="text-xl font-semibold mb-2">
+          최근 7일 시리얼 넘버 사용량
+        </h2>
         <div className="w-full h-64 bg-white border rounded p-4">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data.dailySerialUsage}>

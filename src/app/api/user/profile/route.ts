@@ -14,6 +14,8 @@ export async function GET() {
     where: { email: session.user.email },
     select: {
       name: true,
+      email: true, // ✅ 추가
+      role: true, // ✅ 추가
       image: true,
       gender: true,
       country: true,

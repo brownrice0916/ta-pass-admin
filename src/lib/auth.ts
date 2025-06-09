@@ -12,6 +12,7 @@ declare module "next-auth" {
       name?: string | null;
       image?: string | null;
       membershipType?: string; // 멤버십 타입 필드 추가
+      role?: string;
     };
   }
   interface User {
@@ -20,6 +21,7 @@ declare module "next-auth" {
     name?: string | null;
     image?: string | null;
     membershipType?: string;
+    role?: string;
   }
 }
 
@@ -49,6 +51,7 @@ export const authOptions: NextAuthOptions = {
             name: user.name,
             image: user.image || null,
             membershipType: user.membershipType || "free", // 멤버십 타입 추가
+            role: user.role,
           };
         }
 
@@ -68,6 +71,7 @@ export const authOptions: NextAuthOptions = {
         token.name = user.name;
         token.image = user.image;
         token.membershipType = user.membershipType; // 멤버십 타입 추가
+        token.role = user.role;
       }
 
       // 세션이 업데이트될 때 토큰도 업데이트
@@ -93,6 +97,7 @@ export const authOptions: NextAuthOptions = {
         session.user.image = token.image as string | null;
         session.user.membershipType =
           (token.membershipType as string) || "free"; // 멤버십 타입 추가
+        session.user.role = token.role as string;
       }
 
       // 세션 업데이트 시 DB에서 최신 데이터 가져오기
@@ -105,6 +110,7 @@ export const authOptions: NextAuthOptions = {
             name: true,
             image: true,
             membershipType: true, // 멤버십 타입 선택
+            role: true,
           },
         });
 
@@ -115,6 +121,7 @@ export const authOptions: NextAuthOptions = {
             name: updatedUser.name,
             image: updatedUser.image,
             membershipType: updatedUser.membershipType || "free", // 멤버십 타입 추가
+            role: updatedUser.role,
           };
         }
       }
