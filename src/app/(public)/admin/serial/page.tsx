@@ -19,6 +19,7 @@ interface Serial {
   metadata?: any;
   userId?: number;
   activatedUntil?: string;
+  disposedAt?: string;
   user?: {
     id: number;
     name: string;
@@ -172,6 +173,7 @@ export default function SerialNumberPage() {
             <td className="p-2 border">
               {s.user ? `${s.user.name} (${s.user.email})` : "-"}
             </td>
+            <td className="">{s.disposedAt || "-"}</td>
           </tr>
         ))}
       </tbody>
