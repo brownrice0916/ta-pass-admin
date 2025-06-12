@@ -125,20 +125,21 @@ model Review {
 }
 
 model SerialNumber {
-    id        String   @id @default(cuid()) // 👈 이게 있어야 함
-  code           String    @unique
-  isUsed         Boolean   @default(false)
+  id             String   @id @default(cuid())
+  code           String   @unique
+  isUsed         Boolean  @default(false)
   usedAt         DateTime?
   createdAt      DateTime  @default(now())
   expiresAt      DateTime?
+  disposedAt     DateTime?  // ✅ 폐기일 추가
   type           String    @default("standard")
   metadata       Json?
   userId         Int?
   activatedUntil DateTime?
   user           User?     @relation(fields: [userId], references: [id])
-
   @@index([code])
   @@index([userId])
+  @@index([disposedAt])  // ✅ 폐기일 검색 빠르게 하려고 인덱스 추가해도 좋음
 }
 
 model EmailVerification {

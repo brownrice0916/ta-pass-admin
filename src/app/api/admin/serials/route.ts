@@ -30,9 +30,16 @@ export async function POST(req: Request) {
     );
   }
 
-  const serials = Array.from({ length: count }).map(() => ({
-    code: generateSerial(),
-  }));
+  const serials = Array.from({ length: count }).map(() => {
+    const now = new Date();
+    const disposedAt = new Date(now);
+    disposedAt.setFullYear(now.getFullYear() + 1); // 생성일로부터 1년 뒤
+
+    return {
+      code: generateSerial(),
+      disposedAt,
+    };
+  });
 
   await prisma.serialNumber.createMany({ data: serials });
 
