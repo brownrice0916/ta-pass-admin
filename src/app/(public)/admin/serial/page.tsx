@@ -143,6 +143,7 @@ export default function SerialNumberPage() {
           <th className="p-2 border">상태</th>
           <th className="p-2 border">유형</th>
           <th className="p-2 border">사용자</th>
+          <th className="p-2 border">폐기일</th>
         </tr>
       </thead>
       <tbody>
