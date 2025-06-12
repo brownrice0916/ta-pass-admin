@@ -12,19 +12,12 @@ export default function AdminLoginPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
 
-  useEffect(() => {
-    // 이미 로그인된 경우 대시보드로 강제 이동
-    if (status === "authenticated") {
-      router.replace("/admin/dashboard");
-    }
-  }, [status, session, router]);
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const res = await signIn("credentials", {
       email,
       password,
-      redirect: false,
+      redirect: false, // 이거 꼭 유지
     });
 
     if (res?.ok) {
@@ -34,9 +27,13 @@ export default function AdminLoginPage() {
     }
   };
 
-  // 세션 로딩 중이면 렌더링 보류
-  if (status === "loading" || status === "authenticated") {
-    return null;
+  // ✅ 초기 로딩 중이면 로딩 표시
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div>로딩 중...</div>
+      </div>
+    );
   }
 
   return (
