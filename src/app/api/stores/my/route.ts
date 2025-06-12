@@ -8,7 +8,6 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    console.log(session);
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -26,8 +25,6 @@ export async function GET(req: NextRequest) {
     const restaurant = await prisma.restaurant.findFirst({
       where: { ownerId: user.id },
     });
-
-    console.log(restaurant);
 
     return NextResponse.json({
       restaurant,

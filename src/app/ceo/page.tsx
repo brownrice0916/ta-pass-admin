@@ -18,5 +18,5 @@ export default function CeoDashboardPageWrapper() {
     }
   }, [session]);
 
-  return <div>Go to Somewhere</div>;
+  return;
 }

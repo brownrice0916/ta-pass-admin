@@ -35,8 +35,6 @@ export default function ExcelImport() {
         setProgress(Math.floor(((i + 1) / rows.length) * 100));
       }
 
-      console.log("Processed Data:", processedRows);
-
       const formData = new FormData();
       formData.append("data", JSON.stringify(processedRows)); // 여기에 processedRows 데이터를 추가
 
@@ -51,7 +49,6 @@ export default function ExcelImport() {
       }
 
       const result = await response.json();
-      console.log("API Response:", result);
     } catch (err) {
       console.error("Error processing file:", err);
       setError("파일 처리 중 오류가 발생했습니다.");
@@ -116,7 +113,6 @@ export default function ExcelImport() {
   // SNS 링크 파싱 함수
   const processSocialLinks = (socialLinksStr: string) => {
     if (!socialLinksStr) return [];
-    console.log("Input String:", socialLinksStr);
 
     try {
       // JSON 형식으로 변환 (이미 따옴표가 포함되어 있다고 가정)

@@ -173,7 +173,6 @@ export default function RestaurantForm({
     const isValidSub = options.some(([_, value]) => value === currentSub);
 
     if (!isValidSub) {
-      console.log("서브카테고리 초기화 (값이 유효하지 않음)");
       form.setValue("subCategory", "");
     }
   }, []);

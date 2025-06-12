@@ -26,7 +26,6 @@ export default function Stores() {
       try {
         const res = await fetch("/api/stores/my");
         const json = await res.json();
-        console.log("📦 store fetch result:", json);
 
         if (json?.store) {
           setStoreData(json.store);
@@ -55,14 +54,12 @@ export default function Stores() {
     );
   }
 
-  // ✅ 매장이 없을 경우 등록 폼 보여주기
   if (!loading && !storeData) {
     return (
       <RestaurantForm initialData={undefined} submitButtonText="등록하기" />
     );
   }
 
-  // ✅ 매장 정보 + 로딩 상태 넘기기
   return (
     <StoreInfoTable storeData={storeData} router={router} loading={loading} />
   );

@@ -69,7 +69,6 @@ export default function DashBoard() {
         setTotalViews(data.totalViewsLastMonth);
       })
       .catch(console.error);
-    console.log("stats", stats);
   }, []);
 
   useEffect(() => {
