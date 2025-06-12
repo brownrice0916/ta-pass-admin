@@ -1,9 +1,18 @@
-// app/api/admin/serials/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { nanoid } from "nanoid";
+
+// 새 시리얼 생성기
+function generateSerial() {
+  const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const segment = () =>
+    Array.from({ length: 4 }, () =>
+      charset.charAt(Math.floor(Math.random() * charset.length))
+    ).join("");
+
+  return `${segment()}-${segment()}-${segment()}`;
+}
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -22,7 +31,7 @@ export async function POST(req: Request) {
   }
 
   const serials = Array.from({ length: count }).map(() => ({
-    code: nanoid(10),
+    code: generateSerial(),
   }));
 
   await prisma.serialNumber.createMany({ data: serials });
@@ -35,7 +44,6 @@ export async function POST(req: Request) {
   return NextResponse.json({ serials: savedSerials });
 }
 
-// ✅ GET 추가
 export async function GET() {
   const session = await getServerSession(authOptions);
 

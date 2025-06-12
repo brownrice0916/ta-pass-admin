@@ -28,30 +28,6 @@ interface Review {
   userName: string;
 }
 
-const sampleStats: StatData[] = [
-  { week: "5월 1주", views: 120, bookmarks: 30 },
-  { week: "5월 2주", views: 200, bookmarks: 50 },
-  { week: "5월 3주", views: 180, bookmarks: 70 },
-  { week: "5월 4주", views: 250, bookmarks: 90 },
-];
-
-const latestReviews: Review[] = [
-  {
-    id: "r1",
-    content: "정말 친절하셨어요!",
-    rating: 4.5,
-    createdAt: "2025-05-28",
-    userName: "소연",
-  },
-  {
-    id: "r2",
-    content: "음식이 맛있고 분위기도 좋아요.",
-    rating: 5,
-    createdAt: "2025-05-27",
-    userName: "민수",
-  },
-];
-
 export default function DashBoard() {
   const [activeTab, setActiveTab] = useState<"views" | "bookmarks">("views");
 

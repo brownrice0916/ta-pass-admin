@@ -47,8 +47,6 @@ export default function ExcelImport() {
       if (!response.ok) {
         throw new Error("서버로 데이터를 전송하는 데 실패했습니다.");
       }
-
-      const result = await response.json();
     } catch (err) {
       console.error("Error processing file:", err);
       setError("파일 처리 중 오류가 발생했습니다.");

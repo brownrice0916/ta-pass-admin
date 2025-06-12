@@ -8,12 +8,12 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-interface SerialNumber {
+interface Serial {
   id: string;
   code: string;
   isUsed: boolean;
-  expiresAt: string | null;
   createdAt: string;
+  expiresAt: string | null;
   usedAt?: string;
   type?: string;
   metadata?: any;
@@ -29,9 +29,73 @@ interface SerialNumber {
 export default function SerialNumberPage() {
   const [count, setCount] = useState(10);
   const [generating, setGenerating] = useState(false);
-  const [generatedSerials, setGeneratedSerials] = useState<string[]>([]);
-  const [serials, setSerials] = useState<SerialNumber[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [generatedSerials, setGeneratedSerials] = useState<Serial[]>([]);
+  const [serials, setSerials] = useState<Serial[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [lastCheckedIndex, setLastCheckedIndex] = useState<number | null>(null);
+
+  // 개별 토글
+
+  const handleCheckboxClick = (
+    e: React.MouseEvent<HTMLInputElement>,
+    id: string,
+    index: number
+  ) => {
+    if (e.shiftKey && lastCheckedIndex !== null) {
+      const start = Math.min(lastCheckedIndex, index);
+      const end = Math.max(lastCheckedIndex, index);
+
+      const newSelected = serials.slice(start, end + 1).map((s) => s.id);
+
+      setSelectedIds((prev) => {
+        const merged = [...new Set([...prev, ...newSelected])];
+        return merged;
+      });
+    } else {
+      setSelectedIds((prev) =>
+        prev.includes(id) ? prev.filter((sid) => sid !== id) : [...prev, id]
+      );
+      setLastCheckedIndex(index);
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((sid) => sid !== id) : [...prev, id]
+    );
+  };
+
+  // 전체선택 토글
+  const handleSelectAll = () => {
+    if (selectedIds.length === serials.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(serials.map((s) => s.id));
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedIds.length === 0) {
+      toast.error("삭제할 시리얼을 선택하세요.");
+      return;
+    }
+
+    if (!confirm("정말 삭제하시겠습니까?")) return;
+
+    const res = await fetch("/api/admin/serials/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: selectedIds }),
+    });
+
+    if (res.ok) {
+      toast.success("삭제되었습니다.");
+      setSelectedIds([]);
+      fetchSerials();
+    } else {
+      toast.error("삭제 실패");
+    }
+  };
 
   useEffect(() => {
     fetchSerials();
@@ -41,7 +105,6 @@ export default function SerialNumberPage() {
     const res = await fetch("/api/admin/serials");
     const data = await res.json();
     setSerials(data);
-    setLoading(false);
   };
 
   const handleGenerate = async () => {
@@ -66,10 +129,19 @@ export default function SerialNumberPage() {
     fetchSerials();
   };
 
-  const renderTable = (list: SerialNumber[]) => (
+  const renderTable = (list: Serial[]) => (
     <table className="w-full text-sm border mt-4">
       <thead className="bg-gray-100">
         <tr>
+          <th className="p-2 border">
+            <input
+              type="checkbox"
+              checked={
+                selectedIds.length === serials.length && serials.length > 0
+              }
+              onChange={handleSelectAll}
+            />
+          </th>
           <th className="p-2 border">코드</th>
           <th className="p-2 border">생성일</th>
           <th className="p-2 border">만료일</th>
@@ -79,8 +151,15 @@ export default function SerialNumberPage() {
         </tr>
       </thead>
       <tbody>
-        {list.map((s) => (
+        {list.map((s, index) => (
           <tr key={s.id}>
+            <td className="p-2 border">
+              <input
+                type="checkbox"
+                checked={selectedIds.includes(s.id)}
+                onClick={(e) => handleCheckboxClick(e, s.id, index)}
+              />
+            </td>
             <td className="p-2 border font-mono">{s.code}</td>
             <td className="p-2 border">
               {new Date(s.createdAt).toLocaleDateString()}
@@ -108,6 +187,7 @@ export default function SerialNumberPage() {
   return (
     <Card className="p-6 space-y-6">
       <h2 className="text-xl font-bold">시리얼 넘버 생성</h2>
+
       <div className="flex items-center gap-4">
         <Input
           type="number"
@@ -126,7 +206,7 @@ export default function SerialNumberPage() {
           <ul className="text-sm bg-gray-50 p-4 rounded border max-h-80 overflow-auto">
             {generatedSerials.map((serial, idx) => (
               <li key={idx} className="font-mono">
-                {serial}
+                {serial?.code || "N/A"}
               </li>
             ))}
           </ul>
@@ -135,13 +215,19 @@ export default function SerialNumberPage() {
 
       <div className="pt-4 border-t">
         <h2 className="text-lg font-semibold mb-2">시리얼 목록</h2>
+
         <Tabs defaultValue="all" className="w-full">
-          <TabsList>
-            <TabsTrigger value="all">전체</TabsTrigger>
-            <TabsTrigger value="unused">미사용</TabsTrigger>
-            <TabsTrigger value="used">사용됨</TabsTrigger>
-            <TabsTrigger value="expired">만료됨</TabsTrigger>
-          </TabsList>
+          <div>
+            <TabsList className="mr-10">
+              <TabsTrigger value="all">전체</TabsTrigger>
+              <TabsTrigger value="unused">미사용</TabsTrigger>
+              <TabsTrigger value="used">사용됨</TabsTrigger>
+              <TabsTrigger value="expired">만료됨</TabsTrigger>
+            </TabsList>
+            <Button variant="destructive" onClick={handleDeleteSelected}>
+              선택 삭제
+            </Button>
+          </div>
           <TabsContent value="all">{renderTable(serials)}</TabsContent>
           <TabsContent value="unused">
             {renderTable(

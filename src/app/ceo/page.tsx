@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function CeoDashboardPageWrapper() {
-  const { data: session, status } = useSession({ required: true });
+  const { data: session } = useSession({ required: true });
   const router = useRouter();
 
   useEffect(() => {

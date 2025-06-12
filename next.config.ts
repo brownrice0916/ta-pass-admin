@@ -1,4 +1,3 @@
-// next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -6,6 +5,10 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "**.blob.vercel-storage.com",
+      },
+      {
+        protocol: "https",
+        hostname: "i.ibb.co",
       },
     ],
   },

@@ -255,17 +255,6 @@ export async function POST(request: Request) {
       }
     }
 
-    let specialOfferTypeArray: string[] = [];
-    if (placeData.specialOfferType) {
-      if (Array.isArray(placeData.specialOfferType)) {
-        specialOfferTypeArray = placeData.specialOfferType;
-      } else if (typeof placeData.specialOfferType === "string") {
-        specialOfferTypeArray = placeData.specialOfferType
-          .split(",")
-          .map((item: string) => item.trim());
-      }
-    }
-
     let languagesArray: string[] = [];
     if (placeData.languages) {
       if (Array.isArray(placeData.languages)) {
@@ -316,7 +305,6 @@ export async function POST(request: Request) {
       })
     ).then((urls) => urls.filter((url) => url !== null) as string[]);
 
-    // 추가 태그 목록에 지역 정보 추가 (중복 제거)
     const combinedTags = Array.from(
       new Set([
         ...tagsArray,
@@ -326,14 +314,12 @@ export async function POST(request: Request) {
       ])
     );
 
-    // 만족도, 가성비 등 기본 태그 추가
     if (placeData.satisfaction) combinedTags.push("만족도");
     if (placeData.valueForMoney) combinedTags.push("가성비");
     if (placeData.benefits) combinedTags.push("혜택만족");
     if (placeData.locationConvenience) combinedTags.push("위치편의성");
     if (placeData.productFeatures) combinedTags.push("상품특성");
     if (placeData.recommendation) combinedTags.push("추천의향");
-    const now = new Date();
     // Create restaurant with processed data
     const restaurant = await prisma.restaurant.create({
       data: {
@@ -352,16 +338,14 @@ export async function POST(request: Request) {
         specialOfferTextDetail: placeData.specialOfferTextDetail || "",
         images: imageUrls,
         languages: languagesArray,
-        socialLinks: socialLinksObj || {}, // ✅ 수정
+        socialLinks: socialLinksObj || {},
         region1,
         region2,
         region3,
         region4,
-        viewCount: 0, // ✅ undefined 제거
-        specialOfferType: specialOfferTypeArray,
+        viewCount: 0,
         tags: combinedTags,
         openingHoursText: placeData.openingHoursText || null,
-        // 🔥 id는 넣지 마! 자동 생성됨
       },
     });
 

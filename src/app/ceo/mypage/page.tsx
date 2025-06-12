@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { signOut } from "next-auth/react";
 import { Skeleton } from "@/components/ui/skeleton";
+import Image from "next/image";
 
 export default function MyPage() {
   const [userInfo, setUserInfo] = useState({
@@ -115,7 +116,7 @@ export default function MyPage() {
               className="cursor-pointer relative w-24 h-24 rounded-full overflow-hidden border"
             >
               {userInfo.image ? (
-                <img
+                <Image
                   src={userInfo.image}
                   alt="Profile"
                   className="w-full h-full object-cover"

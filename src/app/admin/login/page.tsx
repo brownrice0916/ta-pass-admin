@@ -17,7 +17,7 @@ export default function AdminLoginPage() {
     if (status === "authenticated") {
       router.replace("/admin/dashboard");
     }
-  }, [status, session]);
+  }, [status, session, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

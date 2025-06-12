@@ -19,7 +19,7 @@ interface AdminUser {
 
 export default function AdminMyPage() {
   const router = useRouter();
-  const { data: session, status } = useSession({
+  useSession({
     required: true,
     onUnauthenticated() {
       router.replace("/admin/login");

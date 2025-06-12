@@ -3,7 +3,6 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { categoryMap, subCategoryMap } from "@/types/category";
 import { FormValues } from "../components/store-form";
 import StoreInfoTable from "./component/store-info-table"; // 스켈레톤 포함 Table
 import { Skeleton } from "@/components/ui/skeleton";

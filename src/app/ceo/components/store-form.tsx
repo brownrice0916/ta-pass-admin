@@ -107,12 +107,16 @@ interface RestaurantFormProps {
   initialData?: Partial<FormValues> & { id?: string };
   // onSubmit: (data: FormValues) => Promise<void>;
   submitButtonText: string;
+  redirectPath: string;
+  onSuccess?: () => void;
 }
 
 export default function RestaurantForm({
   initialData,
   // onSubmit,
   submitButtonText,
+  onSuccess,
+  redirectPath = "/ceo",
 }: RestaurantFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -159,7 +163,6 @@ export default function RestaurantForm({
   });
 
   const { control, setValue, watch } = form;
-  const specialOfferType = watch("specialOfferType");
   const selectedCategory = watch("category");
   const subCategoryOptions = selectedCategory
     ? Object.entries(subCategoryMap[selectedCategory] || {})
@@ -170,7 +173,7 @@ export default function RestaurantForm({
     const currentSub = form.getValues("subCategory");
 
     const options = Object.entries(subCategoryMap[currentCategory] || {});
-    const isValidSub = options.some(([_, value]) => value === currentSub);
+    const isValidSub = options.some(([, value]) => value === currentSub);
 
     if (!isValidSub) {
       form.setValue("subCategory", "");
@@ -278,6 +281,10 @@ export default function RestaurantForm({
   const handleSubmit = async (values: FormValues) => {
     if (!values.name || !selectedCategory) return;
 
+    if (onSuccess) {
+      onSuccess();
+    }
+
     try {
       setLoading(true);
       const formData = new FormData();
@@ -322,7 +329,7 @@ export default function RestaurantForm({
         );
       }
 
-      router.push("/ceo");
+      router.push(redirectPath);
       router.refresh();
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -332,23 +339,6 @@ export default function RestaurantForm({
     }
   };
 
-  // useEffect(() => {
-  //   const category = form.getValues("category");
-
-  //   if (!category && initialData?.category) {
-  //     form.setValue("category", initialData.category);
-  //   }
-
-  //   if (
-  //     category &&
-  //     initialData?.subCategory &&
-  //     Object.values(subCategoryMap[category] || {}).includes(
-  //       initialData.subCategory
-  //     )
-  //   ) {
-  //     form.setValue("subCategory", initialData.subCategory);
-  //   }
-  // }, [initialData, form]);
   return (
     <>
       <h1 className="text-2xl font-bold mb-2">
@@ -792,11 +782,6 @@ export default function RestaurantForm({
                   </div>
                 </div>
               )}
-
-              {/* Map */}
-              {/* <div className="w-full h-64 rounded-lg overflow-hidden">
-                <div ref={mapRef} className="w-full h-full" />
-              </div> */}
 
               <FormField
                 control={control}
