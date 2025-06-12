@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DataTable } from "@/components/ui/admin/data-table";
 
-import RestaurantForm, { FormValues } from "@/app/ceo/components/store-form";
+import RestaurantForm, {
+  FormValues,
+} from "@/app/(public)/ceo/components/store-form";
 import ExcelImport from "../../component/excel-import";
 import TableSkeleton from "../../component/table-skeleton";
 import { DialogTitle } from "@radix-ui/react-dialog";

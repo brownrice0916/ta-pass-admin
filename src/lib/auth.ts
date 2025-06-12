@@ -41,8 +41,19 @@ export const authOptions: NextAuthOptions = {
         }
 
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email: credentials.email.toLowerCase() },
         });
+
+        if (!user) {
+          console.log("User not found");
+          return null;
+        }
+
+        const validPassword = bcrypt.compareSync(
+          credentials.password,
+          user.password
+        );
+        console.log("Password valid:", validPassword);
 
         if (user && bcrypt.compareSync(credentials.password, user.password)) {
           return {

@@ -33,6 +33,11 @@ export default function AdminSignupPage() {
       alert(result.error || "에러 발생");
     }
   };
+  const fields = [
+    { label: "이메일", name: "email", type: "text" },
+    { label: "비밀번호", name: "password", type: "password" },
+    { label: "이름", name: "name", type: "text" },
+  ];
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-50">
@@ -42,14 +47,16 @@ export default function AdminSignupPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {["email", "password", "name"].map((field) => (
-              <div key={field}>
-                <Label htmlFor={field}>{field}</Label>
+            {fields.map((field) => (
+              <div key={field.name}>
+                <Label className="mb-1" htmlFor={field.name}>
+                  {field.label}
+                </Label>
                 <Input
-                  type={field === "password" ? "password" : "text"}
-                  id={field}
-                  name={field}
-                  value={(form as any)[field]}
+                  type={field.type}
+                  id={field.name}
+                  name={field.name}
+                  value={(form as any)[field.name]}
                   onChange={handleChange}
                   required
                 />

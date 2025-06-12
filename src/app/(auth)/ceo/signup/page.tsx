@@ -17,18 +17,16 @@ export default function CEORegisterPage() {
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const router = useRouter(); // ✨ 추가
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 이미지 업로드
     let imageUrl = "";
     if (imageFile) {
       const formData = new FormData();
@@ -43,7 +41,6 @@ export default function CEORegisterPage() {
       imageUrl = data.url;
     }
 
-    // 회원가입
     const res = await fetch("/api/auth/register-ceo", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -53,11 +50,20 @@ export default function CEORegisterPage() {
     const result = await res.json();
     if (res.ok) {
       alert("회원가입 성공!");
-      router.push("/ceo"); // ✅ 여기서 메인으로 이동
+      router.push("/ceo");
     } else {
       alert(result.error || "에러 발생!");
     }
   };
+
+  // ✨ 여기부터 label 한글 + name 매핑
+  const fields = [
+    { label: "이메일", name: "email", type: "text" },
+    { label: "비밀번호", name: "password", type: "password" },
+    { label: "이름", name: "name", type: "text" },
+    { label: "사업장명", name: "businessName", type: "text" },
+    { label: "사업자번호", name: "businessNumber", type: "text" },
+  ];
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-50">
@@ -67,27 +73,25 @@ export default function CEORegisterPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {[
-              "email",
-              "password",
-              "name",
-              "businessName",
-              "businessNumber",
-            ].map((field) => (
-              <div key={field}>
-                <Label htmlFor={field}>{field}</Label>
+            {fields.map((field) => (
+              <div key={field.name}>
+                <Label className="mb-1" htmlFor={field.name}>
+                  {field.label}
+                </Label>
                 <Input
-                  type={field === "password" ? "password" : "text"}
-                  id={field}
-                  name={field}
-                  value={(form as any)[field]}
+                  type={field.type}
+                  id={field.name}
+                  name={field.name}
+                  value={(form as any)[field.name]}
                   onChange={handleChange}
                   required
                 />
               </div>
             ))}
             <div>
-              <Label htmlFor="registrationImage">사업자등록증 이미지</Label>
+              <Label className="mb-1" htmlFor="registrationImage">
+                사업자등록증 이미지
+              </Label>
               <Input
                 type="file"
                 accept="image/*"
