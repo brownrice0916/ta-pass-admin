@@ -1,12 +1,8 @@
-// app/api/admin/ceos/[id]/verify/route.ts
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function POST(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
-  const id = parseInt(params.id);
+export async function POST(req: Request, context: any) {
+  const id = parseInt(context.params.id);
   const { verificationStatus } = await req.json();
 
   if (isNaN(id)) {

@@ -59,12 +59,6 @@ export default function SerialNumberPage() {
     }
   };
 
-  const toggleSelect = (id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((sid) => sid !== id) : [...prev, id]
-    );
-  };
-
   // 전체선택 토글
   const handleSelectAll = () => {
     if (selectedIds.length === serials.length) {
