@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function POST(req: Request, context: any) {
+export async function POST(req: Request, context: { params: any }) {
   const id = parseInt(context.params.id);
   const { verificationStatus } = await req.json();
 
