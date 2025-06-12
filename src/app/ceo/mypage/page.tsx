@@ -118,6 +118,8 @@ export default function MyPage() {
               {userInfo.image ? (
                 <Image
                   src={userInfo.image}
+                  width={300}
+                  height={300}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />

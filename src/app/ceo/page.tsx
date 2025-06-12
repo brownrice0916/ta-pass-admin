@@ -1,4 +1,3 @@
-// ✅ 서버용 비동기 컴포넌트가 아니라 클라이언트 전용이므로 비동기 함수 제거
 "use client";
 
 import { useSession } from "next-auth/react";
@@ -6,17 +5,34 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function CeoDashboardPageWrapper() {
-  const { data: session } = useSession({ required: true });
+  const { data: session, status } = useSession();
   const router = useRouter();
 
+  console.log(session?.user);
   useEffect(() => {
+    // 로딩 중일 때는 아무것도 하지 않음
+    if (status === "loading") return;
+
     if (!session?.user) {
       router.replace("/ceo/login");
-      return;
     } else {
       router.replace("/ceo/dashboard");
     }
-  }, [session]);
+  }, [session, status, router]);
 
-  return;
+  // 로딩 중일 때 표시할 UI
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">로딩 중...</div>
+      </div>
+    );
+  }
+
+  // 리다이렉트 중일 때 표시할 UI (빈 화면 방지)
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-lg">리다이렉트 중...</div>
+    </div>
+  );
 }
