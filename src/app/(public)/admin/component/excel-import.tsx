@@ -84,6 +84,7 @@ export default function ExcelImport() {
     return {
       name: row.name?.trim(),
       category: row.category?.trim() || "Food",
+      subCategory: row.subCategory?.trim() || "",
       description: row.description?.trim() || "",
       about: row.about?.trim() || "",
       languages,
