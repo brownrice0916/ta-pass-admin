@@ -1,18 +1,15 @@
-// app/admin/dashboard/stores/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { DataTable } from "@/components/ui/admin/data-table";
-
 import RestaurantForm, {
   FormValues,
 } from "@/app/(public)/ceo/components/store-form";
 import ExcelImport from "../../component/excel-import";
 import TableSkeleton from "../../component/table-skeleton";
-import { DialogTitle } from "@radix-ui/react-dialog";
 
 interface Store {
   id: string;
@@ -22,12 +19,7 @@ interface Store {
   address: string;
   rating?: number;
   createdAt: string;
-  owner?: {
-    id: number;
-    name: string;
-    email: string;
-  };
-  // 추가 필드
+  owner?: { id: number; name: string; email: string };
   description?: string;
   about?: string;
   specialOfferText?: string;
@@ -53,13 +45,15 @@ export default function StoreListPage() {
   const [loading, setLoading] = useState(true);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  const fetchStores = async () => {
+    setLoading(true);
+    const res = await fetch("/api/admin/stores");
+    const data = await res.json();
+    setStores(data);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchStores = async () => {
-      const res = await fetch("/api/admin/stores");
-      const data = await res.json();
-      setStores(data);
-      setLoading(false);
-    };
     fetchStores();
   }, []);
 
@@ -76,7 +70,7 @@ export default function StoreListPage() {
           store.id === updatedStore.id ? updatedStore : store
         )
       );
-      // 모달 닫기, 성공 모달 열기는 이제 onSuccess에서 통제
+      // 모달 닫기는 onSuccess에서 처리
     } else {
       alert("업데이트 실패");
     }
@@ -109,18 +103,18 @@ export default function StoreListPage() {
     <Card className="p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold">스토어 목록</h2>
-        <ExcelImport /> {/* ✅ 엑셀 업로드 버튼 */}
+        <ExcelImport />
       </div>
       {loading ? (
         <TableSkeleton columns={columns.length} />
       ) : (
         <DataTable columns={columns} data={stores} />
       )}
+
       <Dialog
         open={!!selectedStore}
         onOpenChange={() => setSelectedStore(null)}
       >
-        <DialogTitle className="sr-only"></DialogTitle>
         <DialogContent className="max-w-4xl max-h-screen overflow-y-scroll">
           {selectedStore && (
             <RestaurantForm
@@ -128,7 +122,7 @@ export default function StoreListPage() {
               submitButtonText="수정 완료"
               redirectPath="/admin/stores"
               onSuccess={() => {
-                setSelectedStore(null); // ✅ 모달 닫기
+                setSelectedStore(null);
                 setShowSuccessModal(true);
               }}
               // @ts-expect-error: 타입이 일시적으로 any라 무시
@@ -137,13 +131,19 @@ export default function StoreListPage() {
           )}
         </DialogContent>
       </Dialog>
+
       <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
         <DialogContent className="max-w-md text-center">
-          <div>
-            <DialogTitle>수정 완료</DialogTitle>
-          </div>
+          <DialogTitle>수정 완료</DialogTitle>
           <p className="mb-6">스토어 정보가 성공적으로 수정되었습니다.</p>
-          <Button onClick={() => setShowSuccessModal(false)}>확인</Button>
+          <Button
+            onClick={() => {
+              setShowSuccessModal(false);
+              fetchStores(); // ✅ 확인 클릭시 새로고침
+            }}
+          >
+            확인
+          </Button>
         </DialogContent>
       </Dialog>
     </Card>

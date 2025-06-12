@@ -1,33 +1,30 @@
-// components/ExcelImport.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import * as XLSX from "xlsx";
-import { Upload, AlertCircle } from "lucide-react";
+import { Upload, AlertCircle, CheckCircle } from "lucide-react";
 
 export default function ExcelImport() {
   const [importing, setImporting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
-  // 데이터 처리 함수
   const processExcelData = async (file: File) => {
     setImporting(true);
     setError(null);
     setProgress(0);
 
     try {
-      // 파일 읽기
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data, { type: "array" });
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
       const rows = XLSX.utils.sheet_to_json(sheet);
 
-      // 데이터 처리
       const processedRows = [];
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
@@ -36,17 +33,18 @@ export default function ExcelImport() {
       }
 
       const formData = new FormData();
-      formData.append("data", JSON.stringify(processedRows)); // 여기에 processedRows 데이터를 추가
+      formData.append("data", JSON.stringify(processedRows));
 
       const response = await fetch("/api/restaurants/bulk", {
         method: "POST",
-        body: formData, // FormData를 사용
-        // headers는 따로 설정할 필요 없음. FormData가 자동으로 설정해줌
+        body: formData,
       });
 
       if (!response.ok) {
         throw new Error("서버로 데이터를 전송하는 데 실패했습니다.");
       }
+
+      setSuccess(true); // ✅ 성공 상태
     } catch (err) {
       console.error("Error processing file:", err);
       setError("파일 처리 중 오류가 발생했습니다.");
@@ -55,9 +53,7 @@ export default function ExcelImport() {
     }
   };
 
-  // 엑셀 데이터 변환 로직
   const processExcelRow = async (row: any) => {
-    // languages 처리
     const languages = row.languages?.split(",").map((lang: string) => {
       const langMap: { [key: string]: string } = {
         한국어: "ko",
@@ -68,10 +64,7 @@ export default function ExcelImport() {
       return langMap[lang.trim()] || lang.trim();
     }) || ["ko"];
 
-    // socialLinks 처리
     const socialLinks = processSocialLinks(row.socialLinks);
-
-    // Geocode 처리
     const { lat, lng } = await getGeocode(row.address || "");
 
     const images = row.images
@@ -88,9 +81,11 @@ export default function ExcelImport() {
       description: row.description?.trim() || "",
       about: row.about?.trim() || "",
       languages,
-      tags: (
-        row.tags?.split(",").map((tag: string) => tag.trim()) || []
-      ).filter(Boolean),
+      tags:
+        row.tags
+          ?.split(",")
+          .map((tag: string) => tag.trim())
+          .filter(Boolean) || [],
       socialLinks,
       images,
       region1: row.region1?.trim() || "",
@@ -101,26 +96,22 @@ export default function ExcelImport() {
       addressDetail: row.addressDetail?.trim() || "",
       latitude: lat,
       longitude: lng,
-      specialOfferType: (
-        row.specialOfferType?.split(",").map((tag: string) => tag.trim()) || []
-      ).filter(Boolean),
+      specialOfferType:
+        row.specialOfferType
+          ?.split(",")
+          .map((tag: string) => tag.trim())
+          .filter(Boolean) || [],
       specialOfferText: row.specialOfferText?.trim() || "",
       specialOfferTextDetail: row.specialOfferTextDetail?.trim() || "",
     };
   };
 
-  // SNS 링크 파싱 함수
   const processSocialLinks = (socialLinksStr: string) => {
     if (!socialLinksStr) return [];
 
     try {
-      // JSON 형식으로 변환 (이미 따옴표가 포함되어 있다고 가정)
       const formattedStr = `[${socialLinksStr}]`;
-
-      // 문자열 파싱
       const parsedArray = JSON.parse(formattedStr);
-
-      // platform과 url 추출
       return parsedArray.map((link: Record<string, string>) => {
         const [platform, url] = Object.entries(link)[0];
         return {
@@ -134,7 +125,6 @@ export default function ExcelImport() {
     }
   };
 
-  // 주소로 위도/경도 가져오기
   const getGeocode = async (address: string) => {
     const geocoder = new google.maps.Geocoder();
     try {
@@ -152,9 +142,17 @@ export default function ExcelImport() {
       });
       return result as { lat: number; lng: number };
     } catch {
-      return { lat: 37.5665, lng: 126.978 }; // 기본값 (서울)
+      return { lat: 37.5665, lng: 126.978 };
     }
   };
+
+  useEffect(() => {
+    if (success) {
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500); // ✅ 1.5초 후 자동 새로고침
+    }
+  }, [success]);
 
   return (
     <div className="space-y-4">
@@ -186,6 +184,15 @@ export default function ExcelImport() {
           <Progress value={progress} className="w-full" />
           <p className="text-sm text-gray-500">처리 중... ({progress}% 완료)</p>
         </div>
+      )}
+
+      {success && (
+        <Alert variant="default">
+          <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+          <AlertDescription>
+            ✅ 엑셀 데이터가 성공적으로 등록되었습니다!
+          </AlertDescription>
+        </Alert>
       )}
 
       {error && (
