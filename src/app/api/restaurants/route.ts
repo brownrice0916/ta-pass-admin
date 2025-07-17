@@ -56,10 +56,10 @@ export async function GET(request: Request) {
   try {
     const whereCondition: Prisma.RestaurantWhereInput = {
       ...(category && category !== "전체" && category !== "all"
-        ? { category }
+        ? { category: { key: category } }
         : {}),
       ...(subCategory && subCategory !== "전체" && subCategory !== "all"
-        ? { subCategory }
+        ? { subCategory: { key: subCategory } }
         : {}),
       ...(region && region !== "전체"
         ? {
@@ -68,16 +68,20 @@ export async function GET(request: Request) {
               { region2: { contains: region, mode: "insensitive" } },
               { region3: { contains: region, mode: "insensitive" } },
               { address: { contains: region, mode: "insensitive" } },
-            ],
+            ] as Prisma.RestaurantWhereInput[],
           }
         : {}),
       ...(query
         ? {
             OR: [
               { name: { contains: query, mode: "insensitive" } },
-              { subCategory: { contains: query, mode: "insensitive" } },
+              {
+                subCategory: {
+                  name: { contains: query, mode: "insensitive" },
+                },
+              },
               { description: { contains: query, mode: "insensitive" } },
-            ],
+            ] as Prisma.RestaurantWhereInput[],
           }
         : {}),
       ...(locationMode === "map" && hasValidBounds
@@ -93,6 +97,8 @@ export async function GET(request: Request) {
       include: {
         bookmarks: { select: { id: true } },
         reviews: { select: { tags: true } },
+        category: { select: { name: true, key: true } },
+        subCategory: { select: { name: true, key: true } },
       },
     });
 
@@ -331,8 +337,8 @@ export async function POST(request: Request) {
         addressDetail: placeData.addressDetail || "",
         latitude: parseFloat(placeData.latitude),
         longitude: parseFloat(placeData.longitude),
-        category: placeData.category,
-        subCategory: placeData.subCategory || null,
+        categoryId: placeData.categoryId ?? null,
+        subCategoryId: placeData.subCategoryId ?? null,
         rating: placeData.rating ? parseFloat(placeData.rating) : 0,
         specialOfferText: placeData.specialOfferText || "",
         specialOfferTextDetail: placeData.specialOfferTextDetail || "",

@@ -59,12 +59,10 @@ export async function PUT(request: Request) {
 
     const placeData = JSON.parse(placeDataStr);
 
-    // Process images: keep existing URLs and upload new files
     const processedImageUrls = await Promise.all(
       imageFiles.map(async (image) => {
-        if (typeof image === "string") {
-          return image;
-        } else if (image instanceof File) {
+        if (typeof image === "string") return image;
+        if (image instanceof File) {
           const filename = `${Date.now()}_${image.name.replace(
             /[^a-zA-Z0-9.]/g,
             ""
@@ -78,35 +76,44 @@ export async function PUT(request: Request) {
       })
     );
 
-    // Filter out null values and convert to string array
     const imageUrls = processedImageUrls.filter(
       (url): url is string => url !== null
     );
 
-    // Update restaurant with new data and image URLs
     const updatedRestaurant = await prisma.restaurant.update({
       where: { id },
       data: {
         name: placeData.name,
         address: placeData.address,
         addressDetail: placeData.addressDetail || "",
-        category: placeData.category,
-        description: placeData.description,
+        description: placeData.description || "",
         about: placeData.about || "",
         specialOfferType: placeData.specialOfferType || "none",
         specialOfferText: placeData.specialOfferText || "",
-        latitude: placeData.latitude,
-        longitude: placeData.longitude,
-        rating: placeData.rating || 0,
+        latitude: parseFloat(placeData.latitude),
+        longitude: parseFloat(placeData.longitude),
+        rating: placeData.rating ? parseFloat(placeData.rating) : 0,
         images: imageUrls.length > 0 ? imageUrls : undefined,
-        languages: placeData.languages || [], // 추가
-        socialLinks: placeData.socialLinks || [], // 추가
-        tags: placeData.tags || [], // 추가된 부분
-        subCategory: placeData.subCategory,
+        languages: Array.isArray(placeData.languages)
+          ? placeData.languages
+          : [],
+        socialLinks:
+          typeof placeData.socialLinks === "object"
+            ? placeData.socialLinks
+            : {},
+        tags: Array.isArray(placeData.tags) ? placeData.tags : [],
         region1: placeData.region1,
         region2: placeData.region2,
         region3: placeData.region3,
         region4: placeData.region4 || "",
+
+        // 관계형 필드 연결
+        ...(placeData.categoryId && {
+          category: { connect: { id: placeData.categoryId } },
+        }),
+        ...(placeData.subCategoryId && {
+          subCategory: { connect: { id: placeData.subCategoryId } },
+        }),
       },
     });
 

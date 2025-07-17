@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/form";
 import { MapPin, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { categoryMap, subCategoryMap } from "@/types/category";
 import { Textarea } from "@/components/ui/textarea";
 import DaumPostcode from "react-daum-postcode";
 import { cn } from "@/lib/utils";
@@ -101,6 +100,17 @@ const SOCIAL_PLATFORMS = [
   { value: "website", label: "Website" },
 ];
 
+type CategoryWithSubs = {
+  id: string;
+  name: string;
+  key: string;
+  subCategories: {
+    id: string;
+    name: string;
+    key: string;
+  }[];
+};
+
 export type FormValues = z.infer<typeof formSchema>;
 
 interface RestaurantFormProps {
@@ -163,22 +173,35 @@ export default function RestaurantForm({
   });
 
   const { control, setValue, watch } = form;
+  const [categories, setCategories] = useState<CategoryWithSubs[]>([]);
+
+  useEffect(() => {
+    fetch("/api/ceo/categories")
+      .then((res) => res.json())
+      .then((data) => {
+        setCategories(data);
+        console.log("data", data);
+      });
+  }, []);
+
   const selectedCategory = watch("category");
-  const subCategoryOptions = selectedCategory
-    ? Object.entries(subCategoryMap[selectedCategory] || {})
-    : [];
+  const subCategoryOptions =
+    categories.find((cat) => cat.key === selectedCategory)?.subCategories || [];
 
   useEffect(() => {
     const currentCategory = form.getValues("category");
     const currentSub = form.getValues("subCategory");
 
-    const options = Object.entries(subCategoryMap[currentCategory] || {});
-    const isValidSub = options.some(([, value]) => value === currentSub);
+    const options =
+      categories.find((cat) => cat.key === currentCategory)?.subCategories ||
+      [];
+
+    const isValidSub = options.some((sub) => sub.key === currentSub);
 
     if (!isValidSub) {
       form.setValue("subCategory", "");
     }
-  }, []);
+  }, [categories]);
 
   useEffect(() => {
     if (mapRef.current && typeof google !== "undefined") {
@@ -289,9 +312,17 @@ export default function RestaurantForm({
       setLoading(true);
       const formData = new FormData();
 
+      const selectedCategoryObj = categories.find(
+        (cat) => cat.key === selectedCategory
+      );
+      const selectedSubCategoryObj = selectedCategoryObj?.subCategories.find(
+        (sub) => sub.key === form.getValues("subCategory")
+      );
       // 모든 데이터를 포함하여 전송
       const submitData = {
         ...values,
+        categoryId: selectedCategoryObj?.id ?? null,
+        subCategoryId: selectedSubCategoryObj?.id ?? null,
         category: selectedCategory,
         languages: values.languages,
         socialLinks: socialLinks,
@@ -388,9 +419,9 @@ export default function RestaurantForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {Object.entries(categoryMap).map(([label, value]) => (
-                          <SelectItem key={value as any} value={value as any}>
-                            {label}
+                        {categories.map((cat) => (
+                          <SelectItem key={cat.key} value={cat.key}>
+                            {cat.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -419,9 +450,9 @@ export default function RestaurantForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {subCategoryOptions.map(([label, value]) => (
-                          <SelectItem key={value as any} value={value as any}>
-                            {label}
+                        {subCategoryOptions.map((sub) => (
+                          <SelectItem key={sub.key} value={sub.key}>
+                            {sub.name}
                           </SelectItem>
                         ))}
                       </SelectContent>

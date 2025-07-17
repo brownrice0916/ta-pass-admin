@@ -83,7 +83,6 @@ model Restaurant {
   address                String
   latitude               Float
   longitude              Float
-  category               String?
   rating                 Float?              @default(0)
   specialOfferText       String              @default("")
   images                 String[]            @default([])
@@ -99,7 +98,6 @@ model Restaurant {
   tags                   String[]            @default([])
   specialOfferType       String[]            @default([])
   specialOfferTextDetail String              @default("")
-  subCategory            String?
   openingHoursText       String?
   viewCount              Int                 @default(0)
   ownerId                Int?
@@ -108,6 +106,10 @@ model Restaurant {
   reviews                Review[]
   viewLogs               RestaurantViewLog[]
   bookmarkLogs           BookmarkLog[]
+  categoryId     String?
+  subCategoryId  String?
+  category       Category?    @relation(fields: [categoryId], references: [id])
+  subCategory    SubCategory? @relation(fields: [subCategoryId], references: [id])
 }
 
 model Review {
@@ -140,6 +142,27 @@ model SerialNumber {
   @@index([code])
   @@index([userId])
   @@index([disposedAt])  // ✅ 폐기일 검색 빠르게 하려고 인덱스 추가해도 좋음
+}
+
+model Category {
+  id             String           @id @default(cuid())
+  name           String           @unique          // 예: 맛집
+  key            String           @unique          // 예: food
+  subCategories  SubCategory[]                      // relation
+  restaurants    Restaurant[]                       // relation
+  createdAt      DateTime         @default(now())
+}
+
+model SubCategory {
+  id         String      @id @default(cuid())
+  name       String                         // 예: 일식, 양식
+  key        String                         // 예: japanese, western
+  categoryId String
+  category   Category    @relation(fields: [categoryId], references: [id])
+  restaurants Restaurant[]
+  createdAt  DateTime    @default(now())
+
+  @@unique([categoryId, name])
 }
 
 model EmailVerification {
