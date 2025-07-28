@@ -49,7 +49,7 @@ export default function AdminDashboardPage() {
       {/* 요약 카드 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <SummaryCard label="일반 회원 수" value={data.totalUsers} />
-        <SummaryCard label="CEO 회원 수" value={data.totalCeos} />
+        <SummaryCard label="클라이언트 수" value={data.totalCeos} />
         {/* <SummaryCard label="등록된 가맹점 수" value={data.totalStores} /> */}
         <SummaryCard label="리뷰 수" value={data.totalReviews} />
         <SummaryCard label="시리얼 사용 수" value={data.usedSerials} />

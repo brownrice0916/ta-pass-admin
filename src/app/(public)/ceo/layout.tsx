@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 
 const sidebarItems = [
@@ -18,7 +18,7 @@ export default function CeoDashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const router = useRouter();
+
   const { data: session, status } = useSession();
   const [isVerified, setIsVerified] = useState<boolean | null>(null);
 

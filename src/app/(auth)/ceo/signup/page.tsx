@@ -111,6 +111,7 @@ export default function CEORegisterPage() {
 
         const data = await res.json();
         fileUrl = data.url;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         alert("파일 업로드 중 오류가 발생했습니다.");
         return;
@@ -135,6 +136,7 @@ export default function CEORegisterPage() {
       } else {
         alert(result.error || "에러 발생!");
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       alert("회원가입 중 오류가 발생했습니다.");
     }

@@ -11,7 +11,6 @@ export async function POST(req: Request) {
       businessName,
       businessNumber,
       registrationImage,
-      registrationFileType, // 추가된 필드
     } = await req.json();
 
     // 입력값 검증
@@ -80,6 +79,7 @@ export async function POST(req: Request) {
     });
 
     // 성공 응답 (비밀번호 제외)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _, ...userWithoutPassword } = result;
 
     return NextResponse.json({

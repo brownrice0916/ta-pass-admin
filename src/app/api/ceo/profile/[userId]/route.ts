@@ -1,20 +1,28 @@
+import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 
-export async function GET(
-  req: Request,
-  context: { params: { userId: string } }
-) {
+export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || !session.user) {
+
+  if (!session?.user) {
     return NextResponse.json({ error: "로그인 필요" }, { status: 401 });
   }
 
-  const userId = parseInt(context.params.userId); // ✅ 여기서 context 사용
+  const url = new URL(req.url);
+  const userIdParam = url.pathname.split("/").pop(); // <- 여기로 해결
+
+  if (!userIdParam) {
+    return NextResponse.json(
+      { error: "userId가 필요합니다." },
+      { status: 400 }
+    );
+  }
+
+  const userId = parseInt(userIdParam);
   if (session.user.id !== userId) {
-    return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 });
+    return NextResponse.json({ error: "권한 없음" }, { status: 403 });
   }
 
   const ceoProfile = await prisma.cEOProfile.findUnique({
@@ -25,6 +33,7 @@ export async function GET(
       businessNumber: true,
       verificationStatus: true,
       registrationImage: true,
+      createdAt: true,
     },
   });
 

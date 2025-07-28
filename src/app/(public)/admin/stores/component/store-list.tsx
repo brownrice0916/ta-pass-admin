@@ -10,7 +10,6 @@ import RestaurantForm, {
 } from "@/app/(public)/ceo/components/store-form";
 import ExcelImport from "../../component/excel-import";
 import TableSkeleton from "../../component/table-skeleton";
-import { Category } from "@prisma/client";
 
 interface Store {
   id: string;
