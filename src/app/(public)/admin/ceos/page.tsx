@@ -43,45 +43,59 @@ export default function CEOListPage() {
   }, []);
 
   const handleApprove = async (id: number) => {
-    await fetch(`/api/admin/ceos/${id}/verify`, {
+    const res = await fetch(`/api/admin/ceos/${id}/verify`, {
       method: "POST",
       body: JSON.stringify({ verificationStatus: "approved" }),
     });
-    setCeos((prev) =>
-      prev.map((ceo) =>
-        ceo.id === id
-          ? {
-              ...ceo,
-              ceoProfile: {
-                ...ceo.ceoProfile,
-                verificationStatus: "approved",
-              },
-            }
-          : ceo
-      )
-    );
-    setSelectedCeo(null);
+
+    if (res.ok) {
+      alert("승인되었습니다.");
+      setCeos((prev) =>
+        prev.map((ceo) =>
+          ceo.id === id
+            ? {
+                ...ceo,
+                ceoProfile: {
+                  ...ceo.ceoProfile,
+                  verificationStatus: "approved",
+                },
+              }
+            : ceo
+        )
+      );
+      setSelectedCeo(null);
+    } else {
+      const data = await res.json();
+      alert(`승인 실패: ${data?.error || "알 수 없는 오류"}`);
+    }
   };
 
   const handleReject = async (id: number) => {
-    await fetch(`/api/admin/ceos/${id}/verify`, {
+    const res = await fetch(`/api/admin/ceos/${id}/verify`, {
       method: "POST",
       body: JSON.stringify({ verificationStatus: "rejected" }),
     });
-    setCeos((prev) =>
-      prev.map((ceo) =>
-        ceo.id === id
-          ? {
-              ...ceo,
-              ceoProfile: {
-                ...ceo.ceoProfile,
-                verificationStatus: "rejected",
-              },
-            }
-          : ceo
-      )
-    );
-    setSelectedCeo(null);
+
+    if (res.ok) {
+      alert("거절되었습니다.");
+      setCeos((prev) =>
+        prev.map((ceo) =>
+          ceo.id === id
+            ? {
+                ...ceo,
+                ceoProfile: {
+                  ...ceo.ceoProfile,
+                  verificationStatus: "rejected",
+                },
+              }
+            : ceo
+        )
+      );
+      setSelectedCeo(null);
+    } else {
+      const data = await res.json();
+      alert(`거절 실패: ${data?.error || "알 수 없는 오류"}`);
+    }
   };
 
   const columns = [
@@ -142,11 +156,11 @@ export default function CEOListPage() {
                 <strong>이메일:</strong> {selectedCeo.email}
               </div>
               <div>
-                <strong>상호명:</strong> {selectedCeo.ceoProfile.businessName}
+                <strong>상호명:</strong> {selectedCeo?.ceoProfile?.businessName}
               </div>
               <div>
                 <strong>사업자번호:</strong>{" "}
-                {selectedCeo.ceoProfile.businessNumber}
+                {selectedCeo?.ceoProfile?.businessNumber}
               </div>
               <div>
                 <strong>가입일:</strong>{" "}
@@ -154,16 +168,38 @@ export default function CEOListPage() {
               </div>
               <div>
                 <strong>사업자 등록증:</strong>
-                {selectedCeo.ceoProfile.registrationImage ? (
-                  <Image
-                    src={selectedCeo.ceoProfile.registrationImage}
-                    alt="등록증 이미지"
-                    width={400}
-                    height={300}
-                    className="rounded border"
-                  />
+                {selectedCeo?.ceoProfile?.registrationImage ? (
+                  selectedCeo.ceoProfile.registrationImage.match(/\.pdf$/i) ? (
+                    <div className="space-y-2">
+                      {/* <div className="w-full h-[500px] border rounded overflow-hidden">
+                        <embed
+                          src={selectedCeo.ceoProfile.registrationImage}
+                          type="application/pdf"
+                          width="100%"
+                          height="100%"
+                        />
+                      </div> */}
+                      <a
+                        href={selectedCeo.ceoProfile.registrationImage}
+                        download
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block text-blue-600 underline text-sm"
+                      >
+                        PDF 다운로드
+                      </a>
+                    </div>
+                  ) : (
+                    <Image
+                      src={selectedCeo.ceoProfile.registrationImage}
+                      alt="등록증 이미지"
+                      width={400}
+                      height={300}
+                      className="rounded border"
+                    />
+                  )
                 ) : (
-                  <p>이미지 없음</p>
+                  <p>파일 없음</p>
                 )}
               </div>
               <div className="flex gap-4 pt-2">

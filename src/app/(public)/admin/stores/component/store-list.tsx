@@ -10,12 +10,23 @@ import RestaurantForm, {
 } from "@/app/(public)/ceo/components/store-form";
 import ExcelImport from "../../component/excel-import";
 import TableSkeleton from "../../component/table-skeleton";
+import { Category } from "@prisma/client";
 
 interface Store {
   id: string;
   name: string;
-  category: string;
-  subCategory?: string;
+  category: {
+    createdAt: string;
+    id: string;
+    key: string;
+    name: string;
+  };
+  subCategory?: {
+    createdAt: string;
+    id: string;
+    key: string;
+    name: string;
+  };
   address: string;
   rating?: number;
   createdAt: string;
@@ -49,6 +60,7 @@ export default function StoreListPage() {
     setLoading(true);
     const res = await fetch("/api/admin/stores");
     const data = await res.json();
+    console.log("sotres", data);
     setStores(data);
     setLoading(false);
   };
@@ -79,8 +91,16 @@ export default function StoreListPage() {
   const columns = [
     { header: "ID", accessor: "id" },
     { header: "상호명", accessor: "name" },
-    { header: "카테고리", accessor: "category" },
-    { header: "세부카테고리", accessor: "subCategory" },
+    {
+      header: "카테고리",
+      accessor: "category",
+      render: (row: Store) => row.category?.name ?? "없음",
+    },
+    {
+      header: "세부카테고리",
+      accessor: "subCategory",
+      render: (row: Store) => row.subCategory?.name ?? "없음",
+    },
     { header: "주소", accessor: "address" },
     {
       header: "CEO ID",

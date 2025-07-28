@@ -7,6 +7,8 @@ export async function GET() {
     const stores = await prisma.restaurant.findMany({
       include: {
         owner: true,
+        category: true, // ✅ 카테고리 전체 정보 포함
+        subCategory: true, // ✅ 서브카테고리 전체 정보 포함
       },
       orderBy: {
         createdAt: "desc",

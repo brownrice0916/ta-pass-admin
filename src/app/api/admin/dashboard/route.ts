@@ -3,7 +3,12 @@ import { subDays, startOfDay } from "date-fns";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const totalUsers = await prisma.user.count();
+  const totalUsers = await prisma.user.count({
+    where: { role: "user" }, // 일반 유저
+  });
+  const totalCeos = await prisma.user.count({
+    where: { role: "ceo" }, // CEO 유저
+  });
   const totalStores = await prisma.restaurant.count();
   const totalReviews = await prisma.review.count();
   const usedSerials = await prisma.serialNumber.count({
@@ -13,13 +18,26 @@ export async function GET() {
   const recentUsers = await prisma.user.findMany({
     orderBy: { createdAt: "desc" },
     take: 5,
-    select: { id: true, name: true, email: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      ceoProfile: { select: { id: true } }, // CEO 여부 판단용
+    },
   });
-
   const recentStores = await prisma.restaurant.findMany({
     orderBy: { createdAt: "desc" },
     take: 5,
-    select: { id: true, name: true, address: true },
+    select: {
+      id: true,
+      name: true,
+      address: true,
+      owner: {
+        select: {
+          email: true,
+        },
+      },
+    },
   });
 
   // 최근 7일 일자별 시리얼넘버 사용 수
@@ -48,11 +66,12 @@ export async function GET() {
 
   return NextResponse.json({
     totalUsers,
+    totalCeos,
     totalStores,
     totalReviews,
     usedSerials,
     recentUsers,
     recentStores,
-    dailySerialUsage, // ← 이거 포함!
+    dailySerialUsage,
   });
 }

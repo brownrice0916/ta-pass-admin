@@ -174,7 +174,10 @@ export default function SerialNumberPage() {
             <td className="p-2 border">
               {s.user ? `${s.user.name} (${s.user.email})` : "-"}
             </td>
-            <td className="">{s.disposedAt || "-"}</td>
+            <td className="">
+              {" "}
+              {s.disposedAt ? new Date(s.disposedAt).toLocaleDateString() : "-"}
+            </td>
           </tr>
         ))}
       </tbody>

@@ -16,6 +16,17 @@ export async function POST(req: Request, context: { params: any }) {
     );
   }
 
+  const existingProfile = await prisma.cEOProfile.findUnique({
+    where: { userId: id },
+  });
+
+  if (!existingProfile) {
+    return NextResponse.json(
+      { error: "해당 유저의 프로필이 없습니다." },
+      { status: 404 }
+    );
+  }
+
   await prisma.cEOProfile.update({
     where: { userId: id },
     data: { verificationStatus },

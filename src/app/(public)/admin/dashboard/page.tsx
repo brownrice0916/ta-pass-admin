@@ -14,11 +14,17 @@ import AdminDashboardSkeleton from "./component/admin-dashboard-skeleton";
 
 interface DashboardData {
   totalUsers: number;
+  totalCeos: number;
   totalStores: number;
   totalReviews: number;
   usedSerials: number;
-  recentUsers: { id: number; name: string; email: string }[];
-  recentStores: { id: string; name: string; address: string }[];
+  recentUsers: {
+    id: number;
+    name: string;
+    email: string;
+    ceoProfile: { id: number } | null; // ✅ 추가
+  }[];
+  recentStores: { id: string; name: string; address: string; owner: any }[];
   dailySerialUsage: { date: string; count: number }[];
 }
 
@@ -42,16 +48,17 @@ export default function AdminDashboardPage() {
 
       {/* 요약 카드 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <SummaryCard label="전체 유저" value={data.totalUsers} />
-        <SummaryCard label="가맹점 수" value={data.totalStores} />
+        <SummaryCard label="일반 회원 수" value={data.totalUsers} />
+        <SummaryCard label="CEO 회원 수" value={data.totalCeos} />
+        {/* <SummaryCard label="등록된 가맹점 수" value={data.totalStores} /> */}
         <SummaryCard label="리뷰 수" value={data.totalReviews} />
-        <SummaryCard label="시리얼 사용" value={data.usedSerials} />
+        <SummaryCard label="시리얼 사용 수" value={data.usedSerials} />
       </div>
 
       {/* 시리얼 사용량 그래프 */}
       <div>
         <h2 className="text-xl font-semibold mb-2">
-          최근 7일 시리얼 넘버 사용량
+          Activation Code 활성화 횟수
         </h2>
         <div className="w-full h-64 bg-white border rounded p-4">
           <ResponsiveContainer width="100%" height="100%">
@@ -80,6 +87,7 @@ export default function AdminDashboardPage() {
             <tr className="bg-gray-100">
               <th className="p-2 border">이름</th>
               <th className="p-2 border">이메일</th>
+              <th className="p-2 border">타입</th>
             </tr>
           </thead>
           <tbody>
@@ -87,6 +95,9 @@ export default function AdminDashboardPage() {
               <tr key={user.id}>
                 <td className="p-2 border">{user.name}</td>
                 <td className="p-2 border">{user.email}</td>
+                <td className="p-2 border">
+                  {user.ceoProfile ? "ceo" : "일반"}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -101,6 +112,7 @@ export default function AdminDashboardPage() {
             <tr className="bg-gray-100">
               <th className="p-2 border">상호명</th>
               <th className="p-2 border">주소</th>
+              <th className="p-2 border">ceo</th>
             </tr>
           </thead>
           <tbody>
@@ -108,6 +120,9 @@ export default function AdminDashboardPage() {
               <tr key={store.id}>
                 <td className="p-2 border">{store.name}</td>
                 <td className="p-2 border">{store.address}</td>
+                <td className="p-2 border">
+                  {store.owner?.email || "정보 없음"}
+                </td>
               </tr>
             ))}
           </tbody>

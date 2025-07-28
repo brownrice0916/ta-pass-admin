@@ -18,7 +18,7 @@ export default function AdminDashboardSkeleton() {
       {/* 그래프 Skeleton */}
       <div>
         <h2 className="text-xl font-semibold mb-2">
-          최근 7일 시리얼 넘버 사용량
+          Activation Code 활성화 횟수
         </h2>
         <Skeleton className="w-full h-64 rounded" />
       </div>

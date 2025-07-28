@@ -20,7 +20,7 @@ export default function LoginPage() {
     });
 
     if (res?.ok) {
-      router.push("/ceo/dashboard");
+      router.push("/ceo");
     } else {
       alert("로그인 실패");
     }

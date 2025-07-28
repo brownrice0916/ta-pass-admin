@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { addDays } from "date-fns";
 
 // 새 시리얼 생성기
 function generateSerial() {
@@ -29,15 +30,17 @@ export async function POST(req: Request) {
       { status: 400 }
     );
   }
-
   const serials = Array.from({ length: count }).map(() => {
     const now = new Date();
     const disposedAt = new Date(now);
-    disposedAt.setFullYear(now.getFullYear() + 1); // 생성일로부터 1년 뒤
+    disposedAt.setFullYear(now.getFullYear() + 1); // 1년 뒤
+
+    const expiresAt = addDays(now, 7); // ✅ 7일 뒤
 
     return {
       code: generateSerial(),
       disposedAt,
+      expiresAt, // ✅ 추가됨
     };
   });
 

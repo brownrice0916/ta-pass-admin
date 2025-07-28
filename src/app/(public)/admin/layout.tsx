@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
 
 const sidebarItems = [
-  { label: "대쉬보드", href: "/admin/dashboard" },
+  { label: "대시보드", href: "/admin/dashboard" },
   { label: "유저 관리", href: "/admin/users" },
   { label: "CEO 관리", href: "/admin/ceos" },
   { label: "상점 관리", href: "/admin/stores" },

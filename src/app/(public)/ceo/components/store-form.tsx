@@ -114,7 +114,19 @@ type CategoryWithSubs = {
 export type FormValues = z.infer<typeof formSchema>;
 
 interface RestaurantFormProps {
-  initialData?: Partial<FormValues> & { id?: string };
+  initialData?: Partial<FormValues> & {
+    id?: string;
+    category?: {
+      categoryId: string;
+      name: string;
+      key: string;
+    };
+    subCategory?: {
+      categoryId: string;
+      name: string;
+      key: string;
+    };
+  };
   // onSubmit: (data: FormValues) => Promise<void>;
   submitButtonText: string;
   redirectPath: string;
@@ -147,8 +159,8 @@ export default function RestaurantForm({
     resolver: zodResolver(formSchema),
     mode: "onChange",
     defaultValues: {
-      category: initialData?.category ?? "",
-      subCategory: initialData?.subCategory ?? "",
+      category: initialData?.category?.key ?? "",
+      subCategory: initialData?.subCategory?.key ?? "",
       name: initialData?.name ?? "",
       description: initialData?.description ?? "",
       about: initialData?.about ?? "",
@@ -202,6 +214,27 @@ export default function RestaurantForm({
       form.setValue("subCategory", "");
     }
   }, [categories]);
+
+  useEffect(() => {
+    if (
+      !categories.length ||
+      !initialData?.category ||
+      !initialData?.subCategory
+    )
+      return;
+
+    const matchedCategory = categories.find(
+      (cat) => cat.key === initialData.category?.key
+    );
+    const matchedSubCategory = matchedCategory?.subCategories.find(
+      (sub) => sub.key === initialData.subCategory?.key
+    );
+
+    if (matchedCategory && matchedSubCategory) {
+      form.setValue("category", matchedCategory.key);
+      form.setValue("subCategory", matchedSubCategory.key);
+    }
+  }, [categories, initialData]);
 
   useEffect(() => {
     if (mapRef.current && typeof google !== "undefined") {
@@ -324,6 +357,7 @@ export default function RestaurantForm({
         categoryId: selectedCategoryObj?.id ?? null,
         subCategoryId: selectedSubCategoryObj?.id ?? null,
         category: selectedCategory,
+
         languages: values.languages,
         socialLinks: socialLinks,
         region1: values.region1,
@@ -375,6 +409,7 @@ export default function RestaurantForm({
       <h1 className="text-2xl font-bold mb-2">
         스토어 정보 {initialData ? "수정" : "추가"}
       </h1>
+
       <div className="bg-[#f3f4f6] p-2">
         <Card className="p-6 pb-16 bg-white rounded-md">
           <Form {...form}>
@@ -408,6 +443,7 @@ export default function RestaurantForm({
                     </FormLabel>
                     <Select
                       onValueChange={(value) => {
+                        console.log(value);
                         field.onChange(value); // hook-form에 반영
                         setValue("subCategory", ""); // 🔁 서브카테고리 초기화
                       }}
@@ -430,7 +466,6 @@ export default function RestaurantForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={control}
                 name="subCategory"
@@ -461,7 +496,6 @@ export default function RestaurantForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={control}
                 name="description"
@@ -529,7 +563,6 @@ export default function RestaurantForm({
                   </FormItem>
                 )}
               />
-
               {/* Tags Input */}
               <FormField
                 control={control}
@@ -697,7 +730,6 @@ export default function RestaurantForm({
                   </FormItem>
                 )}
               />
-
               {/* Address Search */}
               <FormField
                 control={control}
@@ -754,66 +786,105 @@ export default function RestaurantForm({
                     </div>
                     <DaumPostcode
                       onComplete={(data) => {
+                        console.log("DaumPostcode onComplete 호출됨:", data); // 디버깅용
+
                         // 기본 주소 설정
                         setValue("address", data.address);
 
                         // 지역 정보 설정
-                        // region1: 시/도
                         setValue("region1", data.sido);
-                        // region2: 구/군
                         setValue("region2", data.sigungu);
-                        // region3: 동/읍/면
                         setValue("region3", data.bname);
 
-                        // 구글 지오코딩으로 좌표 및 추가 정보 얻기
-                        const geocoder = new google.maps.Geocoder();
-                        geocoder.geocode(
-                          { address: data.address },
-                          (results, status) => {
-                            if (status === "OK" && results?.[0]) {
-                              const lat = results[0].geometry.location.lat();
-                              const lng = results[0].geometry.location.lng();
-                              setValue("latitude", lat);
-                              setValue("longitude", lng);
+                        // 구글 지오코딩 처리를 Promise로 감싸서 처리
+                        const handleGeocoding = async () => {
+                          try {
+                            if (typeof google !== "undefined" && google.maps) {
+                              const geocoder = new google.maps.Geocoder();
 
-                              // region4: 주변 랜드마크나 지역명 설정
-                              const addressComponents =
-                                results[0].address_components;
-                              let landmark = "";
+                              const geocodeResult = await new Promise<
+                                google.maps.GeocoderResult[]
+                              >((resolve, reject) => {
+                                geocoder.geocode(
+                                  { address: data.address },
+                                  (results, status) => {
+                                    if (status === "OK" && results) {
+                                      resolve(results);
+                                    } else {
+                                      reject(
+                                        new Error(`Geocoding failed: ${status}`)
+                                      );
+                                    }
+                                  }
+                                );
+                              });
 
-                              // 주변 랜드마크/지역명 찾기
-                              for (const component of addressComponents) {
-                                if (
-                                  component.types.includes("neighborhood") ||
-                                  component.types.includes(
-                                    "sublocality_level_4"
-                                  ) ||
-                                  component.types.includes("point_of_interest")
-                                ) {
-                                  landmark = component.long_name;
-                                  break;
+                              if (geocodeResult[0]) {
+                                const lat =
+                                  geocodeResult[0].geometry.location.lat();
+                                const lng =
+                                  geocodeResult[0].geometry.location.lng();
+                                setValue("latitude", lat);
+                                setValue("longitude", lng);
+
+                                // region4: 주변 랜드마크나 지역명 설정
+                                const addressComponents =
+                                  geocodeResult[0].address_components;
+                                let landmark = "";
+
+                                for (const component of addressComponents) {
+                                  if (
+                                    component.types.includes("neighborhood") ||
+                                    component.types.includes(
+                                      "sublocality_level_4"
+                                    ) ||
+                                    component.types.includes(
+                                      "point_of_interest"
+                                    )
+                                  ) {
+                                    landmark = component.long_name;
+                                    break;
+                                  }
+                                }
+
+                                setValue("region4", landmark);
+
+                                // 지도 업데이트
+                                if (mapInstance.current && markerRef.current) {
+                                  const newLatLng = { lat, lng };
+                                  mapInstance.current.setCenter(newLatLng);
+                                  markerRef.current.setPosition(newLatLng);
                                 }
                               }
-
-                              // region4 설정 (랜드마크나 동네 상권명)
-                              setValue("region4", landmark);
-
-                              // 지도 업데이트
-                              if (mapInstance.current && markerRef.current) {
-                                const newLatLng = { lat, lng };
-                                mapInstance.current.setCenter(newLatLng);
-                                markerRef.current.setPosition(newLatLng);
-                              }
                             }
+                          } catch (error) {
+                            console.error("Geocoding error:", error);
+                            // 지오코딩 실패해도 주소는 설정되었으므로 계속 진행
                           }
-                        );
+                        };
+
+                        // 지오코딩 처리 (백그라운드에서 실행)
+                        handleGeocoding();
+
+                        // 모달 즉시 닫기 (지오코딩 완료를 기다리지 않음)
+                        console.log("모달 닫기 시도"); // 디버깅용
                         setIsAddressModalOpen(false);
+                      }}
+                      onClose={(state) => {
+                        console.log("DaumPostcode onClose 호출됨:", state); // 디버깅용
+                        // 사용자가 주소 선택 없이 창을 닫은 경우
+                        if (state === "FORCE_CLOSE") {
+                          setIsAddressModalOpen(false);
+                        }
+                      }}
+                      style={{
+                        width: "100%",
+                        height: "400px",
                       }}
                     />
                   </div>
                 </div>
               )}
-
               <FormField
                 control={control}
                 name="about"
@@ -869,7 +940,6 @@ export default function RestaurantForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={control}
                 name="specialOfferText"
@@ -919,16 +989,17 @@ export default function RestaurantForm({
                   />
                 )}
               />
-
               <div className="flex gap-3 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => router.push("/ceo")}
-                  className="flex-1"
-                >
-                  취소
-                </Button>
+                {redirectPath === "ceo" && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => router.push("/ceo")}
+                    className="flex-1"
+                  >
+                    취소
+                  </Button>
+                )}
                 <Button
                   type="submit"
                   disabled={loading || !form.formState.isValid}
