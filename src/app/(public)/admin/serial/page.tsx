@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 interface Serial {
   id: string;
@@ -36,6 +38,33 @@ export default function SerialNumberPage() {
   const [lastCheckedIndex, setLastCheckedIndex] = useState<number | null>(null);
 
   // 개별 토글
+
+  const handleDownloadExcel = () => {
+    if (generatedSerials.length === 0) {
+      toast.error("엑셀로 내보낼 시리얼이 없습니다.");
+      return;
+    }
+
+    const worksheetData = [
+      ["난수번호"],
+      ...generatedSerials.map((s) => [s.code]),
+    ];
+
+    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "시리얼");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const blob = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+
+    saveAs(blob, `generated_serials_${new Date().toISOString()}.xlsx`);
+  };
 
   const handleCheckboxClick = (
     e: React.MouseEvent<HTMLInputElement>,
@@ -187,6 +216,21 @@ export default function SerialNumberPage() {
   return (
     <Card className="p-6 space-y-6">
       <h2 className="text-xl font-bold">시리얼 넘버 생성</h2>
+      {generatedSerials.length > 0 && (
+        <div>
+          <h3 className="text-md font-semibold mb-2">생성된 시리얼</h3>
+          <ul className="text-sm bg-gray-50 p-4 rounded border max-h-80 overflow-auto">
+            {generatedSerials.map((serial, idx) => (
+              <li key={idx} className="font-mono">
+                {serial?.code || "N/A"}
+              </li>
+            ))}
+          </ul>
+          <Button className="mt-2" onClick={handleDownloadExcel}>
+            엑셀로 다운로드
+          </Button>
+        </div>
+      )}
 
       <div className="flex items-center gap-4">
         <Input
