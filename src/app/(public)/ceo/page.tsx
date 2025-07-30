@@ -15,9 +15,9 @@ interface CEOProfile {
 
 export default function CeoDashboardPageWrapper() {
   const router = useRouter();
-  useEffect(() => {
-    router.push("/ceo/dashboard");
-  }, []);
+  // useEffect(() => {
+  //   router.push("/ceo/dashboard");
+  // }, []);
   return (
     <CeoRouteGuard>
       <div>main</div>

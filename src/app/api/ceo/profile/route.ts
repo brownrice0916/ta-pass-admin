@@ -24,23 +24,8 @@ export async function GET() {
     );
   }
 
-  const {
-    id,
-    businessName,
-    businessNumber,
-    verificationStatus,
-    registrationImage,
-    paymentStatus,
-  } = user.ceoProfile;
-
-  return NextResponse.json({
-    id,
-    businessName,
-    businessNumber,
-    verificationStatus,
-    registrationImage,
-    paymentStatus,
-  });
+  // ✅ 통째로 응답
+  return NextResponse.json(user.ceoProfile);
 }
 
 export async function PUT(req: Request) {

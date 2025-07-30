@@ -60,6 +60,15 @@ export async function POST(req: Request) {
           password: hashed,
           name: name.trim(),
           role: "ceo",
+          ceoProfile: {
+            create: {
+              // businessName: "",
+              // businessNumber: "",
+              //registrationImage,
+              // registrationFileType 필드가 스키마에 있다면 추가
+              // registrationFileType,
+            },
+          },
         },
         include: {
           ceoProfile: true,

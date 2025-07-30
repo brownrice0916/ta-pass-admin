@@ -29,22 +29,36 @@ model User {
   serialNumbers  SerialNumber[]
   viewLogs       RestaurantViewLog[]
   bookmarkLogs   BookmarkLog[]
+  paymentStatus      PaymentStatus      @default(unpaid)
 }
 
 model CEOProfile {
   id                 String             @id @default(uuid())
   userId             Int                @unique
-  businessName       String
-  businessNumber     String             @unique
+  businessName       String?
+  businessNumber     String?             @unique
   verificationStatus VerificationStatus @default(pending)
   registrationImage  String?
   createdAt          DateTime           @default(now())
   user               User               @relation(fields: [userId], references: [id])
-
+  ceoName            String?
+  address            String?
+  addressDetail      String?
+  startDate          DateTime?
    // ✅ 추가
   paymentStatus      PaymentStatus      @default(unpaid) // 결제 여부 (unpaid / paid)
   paymentPlan        PaymentPlan?                       // 어떤 요금제인지
+// ✅ 요거 추가
+  setupStatus        SetupStatus        @default(not_started)
 }
+
+enum SetupStatus {
+  not_started   // 결제 전
+  paid_only     // 결제만 완료 (사업자/매장 미입력)
+  info_filled   // 사업자/매장 정보 입력 완료
+  submitted     // 입점 신청 완료
+}
+
 
 model Bookmark {
   id           String     @id @default(cuid())

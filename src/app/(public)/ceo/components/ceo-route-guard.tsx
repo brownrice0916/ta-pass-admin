@@ -11,7 +11,6 @@ export default function CeoRouteGuard({
 }) {
   const { data: session, status } = useSession();
   const router = useRouter();
-
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,12 +21,26 @@ export default function CeoRouteGuard({
         const res = await fetch("/api/ceo/profile");
         const data = await res.json();
 
-        if (data.paymentStatus === "unpaid") {
+        const { paymentStatus, verificationStatus, setupStatus } = data;
+        console.log("data", data);
+
+        console.log(setupStatus);
+        if (paymentStatus === "unpaid") {
           router.replace("/ceo/subscribe");
-        } else if (data.verificationStatus !== "approved") {
+        } else if (setupStatus === "paid_only") {
+          router.replace("/ceo/profile/business");
+        } else if (setupStatus === "info_filled") {
+          router.replace("/ceo/stores"); // ⬅️ 입점신청 버튼 있는 페이지
+        } else if (
+          setupStatus === "submitted" &&
+          verificationStatus === "pending"
+        ) {
           router.replace("/ceo/unverified");
+        } else if (verificationStatus === "approved") {
+          router.replace("/ceo/dashboard");
+          setLoading(false); // ✅ 정상 통과
         } else {
-          setLoading(false); // ✅ 통과
+          console.warn("Unexpected ceoProfile state", data);
         }
       } catch (e) {
         console.error(e);
