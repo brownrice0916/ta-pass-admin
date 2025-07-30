@@ -35,7 +35,7 @@ export default function SignupPage() {
 
   // 타이머 효과
   useEffect(() => {
-    let timer;
+    let timer: any;
     if (timeLeft > 0) {
       timer = setInterval(() => {
         setTimeLeft((prev) => {
@@ -52,13 +52,13 @@ export default function SignupPage() {
     };
   }, [timeLeft]);
 
-  const handleChange = (e) => {
+  const handleChange = (e: any) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   // 시간 포맷팅 함수
-  const formatTime = (seconds) => {
+  const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
@@ -154,7 +154,7 @@ export default function SignupPage() {
     }
   };
 
-  const handleAgreementChange = (key) => {
+  const handleAgreementChange = (key: keyof typeof agreements) => {
     if (key === "all") {
       const newValue = !agreements.all;
       setAgreements({
@@ -190,7 +190,7 @@ export default function SignupPage() {
   };
 
   // 회원가입 로직 추가
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
 
     if (!emailVerified) {
@@ -481,36 +481,37 @@ export default function SignupPage() {
                   text: "(필수) 제3자 제공 동의 (PG사 결제 처리 목적)",
                   required: false,
                 },
-              ].map((item) => (
-                <div
-                  key={item.key}
-                  className="flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => handleAgreementChange(item.key)}
-                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                        agreements[item.key]
-                          ? "bg-blue-500 border-blue-500"
-                          : "border-gray-300"
-                      }`}
-                    >
-                      {agreements[item.key] && (
-                        <Check className="w-4 h-4 text-white" />
-                      )}
-                    </button>
-                    <span
-                      className={
-                        item.required ? "text-red-500" : "text-gray-700"
-                      }
-                    >
-                      {item.text}
-                    </span>
+              ].map((item) => {
+                const key = item.key as keyof typeof agreements;
+
+                return (
+                  <div key={key} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => handleAgreementChange(key)}
+                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                          agreements[key]
+                            ? "bg-blue-500 border-blue-500"
+                            : "border-gray-300"
+                        }`}
+                      >
+                        {agreements[key] && (
+                          <Check className="w-4 h-4 text-white" />
+                        )}
+                      </button>
+                      <span
+                        className={
+                          item.required ? "text-red-500" : "text-gray-700"
+                        }
+                      >
+                        {item.text}
+                      </span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
                   </div>
-                  <ChevronRight className="w-4 h-4 text-gray-400" />
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="text-xs text-gray-500 space-y-1 mt-4">
