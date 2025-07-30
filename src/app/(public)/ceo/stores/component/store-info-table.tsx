@@ -11,6 +11,7 @@ interface Props {
 }
 
 export default function StoreInfoTable({ storeData, router, loading }: Props) {
+  console.log("storeData", storeData);
   const renderRow = (label: string, value?: string | number | null) =>
     value ? (
       <TableRow>
@@ -43,7 +44,7 @@ export default function StoreInfoTable({ storeData, router, loading }: Props) {
                 {renderRow("상호명", storeData.name)}
                 {renderRow(
                   "카테고리",
-                  `${storeData.category} > ${storeData.subCategory ?? ""}`
+                  `${storeData.category?.name} > ${storeData.subCategory?.name ?? ""}`
                 )}
                 {renderRow(
                   "주소",

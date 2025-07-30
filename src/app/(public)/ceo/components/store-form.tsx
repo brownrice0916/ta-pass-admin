@@ -351,6 +351,7 @@ export default function RestaurantForm({
       const selectedSubCategoryObj = selectedCategoryObj?.subCategories.find(
         (sub) => sub.key === form.getValues("subCategory")
       );
+
       // 모든 데이터를 포함하여 전송
       const submitData = {
         ...values,
@@ -365,7 +366,7 @@ export default function RestaurantForm({
         region3: values.region3,
         region4: values.region4 || "",
       };
-
+      console.log("submitData", submitData);
       formData.append("data", JSON.stringify(submitData));
 
       // 이미지 처리: File과 URL 문자열을 구분하여 처리
@@ -403,6 +404,7 @@ export default function RestaurantForm({
       setLoading(false);
     }
   };
+  console.log("init", initialData);
 
   return (
     <>

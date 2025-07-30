@@ -8,13 +8,13 @@ export async function POST(req: Request) {
       email,
       password,
       name,
-      businessName,
-      businessNumber,
-      registrationImage,
+      // businessName,
+      // businessNumber,
+      // registrationImage,
     } = await req.json();
 
     // 입력값 검증
-    if (!email || !password || !name || !businessName || !businessNumber) {
+    if (!email || !password || !name) {
       return NextResponse.json(
         { error: "필수 필드가 누락되었습니다." },
         { status: 400 }
@@ -42,13 +42,13 @@ export async function POST(req: Request) {
       }
 
       // 사업자번호 중복 검사
-      const existingBusiness = await tx.cEOProfile.findUnique({
-        where: { businessNumber },
-      });
+      // const existingBusiness = await tx.cEOProfile.findUnique({
+      //   where: { businessNumber },
+      // });
 
-      if (existingBusiness) {
-        throw new Error("이미 등록된 사업자번호입니다.");
-      }
+      // if (existingBusiness) {
+      //   throw new Error("이미 등록된 사업자번호입니다.");
+      // }
 
       // 비밀번호 해싱
       const hashed = await hash(password, 10);
@@ -60,15 +60,6 @@ export async function POST(req: Request) {
           password: hashed,
           name: name.trim(),
           role: "ceo",
-          ceoProfile: {
-            create: {
-              businessName: businessName.trim(),
-              businessNumber: businessNumber.trim(),
-              registrationImage,
-              // registrationFileType 필드가 스키마에 있다면 추가
-              // registrationFileType,
-            },
-          },
         },
         include: {
           ceoProfile: true,

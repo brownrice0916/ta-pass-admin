@@ -1,4 +1,3 @@
-// /app/api/ceo/profile/route.ts
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -25,7 +24,23 @@ export async function GET() {
     );
   }
 
-  return NextResponse.json(user.ceoProfile);
+  const {
+    id,
+    businessName,
+    businessNumber,
+    verificationStatus,
+    registrationImage,
+    paymentStatus,
+  } = user.ceoProfile;
+
+  return NextResponse.json({
+    id,
+    businessName,
+    businessNumber,
+    verificationStatus,
+    registrationImage,
+    paymentStatus,
+  });
 }
 
 export async function PUT(req: Request) {

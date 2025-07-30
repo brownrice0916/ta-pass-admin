@@ -40,6 +40,10 @@ model CEOProfile {
   registrationImage  String?
   createdAt          DateTime           @default(now())
   user               User               @relation(fields: [userId], references: [id])
+
+   // ✅ 추가
+  paymentStatus      PaymentStatus      @default(unpaid) // 결제 여부 (unpaid / paid)
+  paymentPlan        PaymentPlan?                       // 어떤 요금제인지
 }
 
 model Bookmark {
@@ -166,7 +170,7 @@ model SubCategory {
 }
 
 model EmailVerification {
-  id        String   @id
+  id        String   @id @default(uuid())
   email     String   @unique
   code      String
   verified  Boolean  @default(false)
@@ -178,4 +182,15 @@ enum VerificationStatus {
   pending
   approved
   rejected
+}
+
+enum PaymentStatus {
+  unpaid
+  paid
+}
+
+enum PaymentPlan {
+  single
+  multi
+  special
 }

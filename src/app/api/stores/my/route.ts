@@ -12,7 +12,6 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // 사용자 찾기
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
@@ -21,9 +20,12 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // 사용자의 레스토랑 찾기
     const restaurant = await prisma.restaurant.findFirst({
       where: { ownerId: user.id },
+      include: {
+        category: true,
+        subCategory: true,
+      },
     });
 
     return NextResponse.json({
