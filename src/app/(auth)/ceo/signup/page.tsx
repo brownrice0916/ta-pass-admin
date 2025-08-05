@@ -331,7 +331,7 @@ export default function SignupPage() {
                     </Button>
                   </div>
                   <div className="text-xs text-gray-500">
-                    {timeLeft > 0 ? (
+                    {timeLeft > 0 && !emailVerified ? (
                       <span>인증번호 유효시간: {formatTime(timeLeft)}</span>
                     ) : (
                       <span className="text-red-500">

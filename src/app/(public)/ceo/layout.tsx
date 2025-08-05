@@ -98,6 +98,7 @@ export default function CeoDashboardLayout({
           </nav>
         </aside>
       )}
+
       <main className="flex-1 p-6">{children}</main>
     </div>
   );

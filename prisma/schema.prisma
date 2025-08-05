@@ -208,3 +208,16 @@ enum PaymentPlan {
   multi
   special
 }
+
+model Payment {
+  id          String   @id @default(cuid())
+  paymentKey  String   @unique
+  orderId     String
+  amount      Int
+  orderName   String
+  customerName String?
+  status      String   // 결제 성공 여부 등
+  method      String?  // 카드, 가상계좌 등
+  approvedAt  DateTime
+  createdAt   DateTime @default(now())
+}
