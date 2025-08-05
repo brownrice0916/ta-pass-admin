@@ -203,7 +203,10 @@ export default function PricingTable() {
                     </td>
                     {plans.map((plan) => {
                       const value =
-                        key in plan ? plan[key] : plan.features?.[key];
+                        key in plan
+                          ? plan[key as keyof typeof plan]
+                          : plan.features?.[key as keyof typeof plan.features];
+
                       const content =
                         typeof value === "boolean" ? (value ? "●" : "") : value;
                       return (
@@ -211,7 +214,7 @@ export default function PricingTable() {
                           key={plan.key + key}
                           className={`text-center px-6 py-3 border-l border-gray-100 ${plan.available ? "text-black" : "text-gray-400"}`}
                         >
-                          {content}
+                          {content as any}
                         </td>
                       );
                     })}
