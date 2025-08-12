@@ -11,6 +11,7 @@ const sidebarItems = [
   { label: "대시보드", href: "/ceo/dashboard" },
   { label: "내 상점 관리", href: "/ceo/stores" },
   { label: "내 정보 관리", href: "/ceo/mypage" },
+  { label:'결제 관라',href:"/ceo/billings"}
 ];
 
 export default function CeoDashboardLayout({

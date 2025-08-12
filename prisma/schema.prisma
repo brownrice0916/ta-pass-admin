@@ -30,6 +30,8 @@ model User {
   viewLogs       RestaurantViewLog[]
   bookmarkLogs   BookmarkLog[]
   paymentStatus      PaymentStatus      @default(unpaid)
+  paymentMethod      PaymentMethod? 
+  payments           Payment[]           // 다건 결제 이력
 }
 
 model CEOProfile {
@@ -210,14 +212,37 @@ enum PaymentPlan {
 }
 
 model Payment {
-  id          String   @id @default(cuid())
-  paymentKey  String   @unique
-  orderId     String
-  amount      Int
-  orderName   String
-  customerName String?
-  status      String   // 결제 성공 여부 등
-  method      String?  // 카드, 가상계좌 등
-  approvedAt  DateTime
-  createdAt   DateTime @default(now())
+  id            String   @id @default(cuid())
+  userId        Int                      // 🔄 Int로 변경
+  paymentKey    String   @unique
+  orderId       String   @unique
+  amount        Int
+  orderName     String
+  customerName  String?
+  status        String
+  method        String?
+  approvedAt    DateTime?
+  receiptUrl    String?
+  canceledAt    DateTime?
+  cancelReason  String?
+  createdAt     DateTime @default(now())
+
+  // 🔽 관계 필드/참조 정합
+  user          User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model PaymentMethod {
+  id           String   @id @default(cuid())
+  userId       Int       @unique            // 🔄 Int로 변경(1:1이면 @unique 유지)
+  customerKey  String   @unique
+  billingKey   String   @unique
+  cardBrand    String?
+  cardLast4    String?
+  cardOwner    String?
+  updatedAt    DateTime @default(now())
+
+  // 🔽 관계 필드/참조 정합
+  user         User     @relation(fields: [userId], references: [id])
 }

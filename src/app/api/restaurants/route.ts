@@ -327,36 +327,51 @@ export async function POST(request: Request) {
     if (placeData.productFeatures) combinedTags.push("상품특성");
     if (placeData.recommendation) combinedTags.push("추천의향");
     // Create restaurant with processed data
-    const restaurant = await prisma.restaurant.create({
-      data: {
-        ownerId,
-        name: placeData.name,
-        description: placeData.description || "",
-        about: placeData.about || "",
-        address: placeData.address,
-        addressDetail: placeData.addressDetail || "",
-        latitude: parseFloat(placeData.latitude),
-        longitude: parseFloat(placeData.longitude),
-        categoryId: placeData.categoryId ?? null,
-        subCategoryId: placeData.subCategoryId ?? null,
-        rating: placeData.rating ? parseFloat(placeData.rating) : 0,
-        specialOfferText: placeData.specialOfferText || "",
-        specialOfferTextDetail: placeData.specialOfferTextDetail || "",
-        images: imageUrls,
-        languages: languagesArray,
-        socialLinks: socialLinksObj || {},
-        region1,
-        region2,
-        region3,
-        region4,
-        viewCount: 0,
-        tags: combinedTags,
-        openingHoursText: placeData.openingHoursText || null,
-      },
-    });
+    const result = await prisma.$transaction(async (tx) => {
+      const existingCount = await tx.restaurant.count({ where: { ownerId } });
 
+      const restaurant = await tx.restaurant.create({
+        data: {
+          ownerId,
+          name: placeData.name,
+          description: placeData.description || "",
+          about: placeData.about || "",
+          address: placeData.address,
+          addressDetail: placeData.addressDetail || "",
+          latitude: parseFloat(placeData.latitude),
+          longitude: parseFloat(placeData.longitude),
+          categoryId: placeData.categoryId ?? null,
+          subCategoryId: placeData.subCategoryId ?? null,
+          rating: placeData.rating ? parseFloat(placeData.rating) : 0,
+          specialOfferText: placeData.specialOfferText || "",
+          specialOfferTextDetail: placeData.specialOfferTextDetail || "",
+          images: imageUrls, // ← 위에서 업로드한 URL들
+          languages: languagesArray,
+          socialLinks: socialLinksObj || {},
+          region1,
+          region2,
+          region3,
+          region4,
+          viewCount: 0,
+          tags: combinedTags,
+          openingHoursText: placeData.openingHoursText || null,
+          updatedAt: new Date(),
+        },
+      });
+
+      // ✅ 최초 등록일 때만 승격
+      if (existingCount === 0) {
+        await tx.cEOProfile.upsert({
+          where: { userId: ownerId },
+          create: { userId: ownerId, setupStatus: "submitted" },
+          update: { setupStatus: "submitted" },
+        });
+      }
+
+      return { restaurant, firstTime: existingCount === 0 };
+    });
     // BigInt 처리를 위한 커스텀 직렬화 사용
-    return new NextResponse(JSON.stringify(restaurant, replaceBigInt), {
+    return new NextResponse(JSON.stringify(result.restaurant, replaceBigInt), {
       status: 200,
       headers: {
         "Content-Type": "application/json",

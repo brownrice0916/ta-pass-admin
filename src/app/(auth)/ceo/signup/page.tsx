@@ -330,15 +330,6 @@ export default function SignupPage() {
                           : "인증 확인"}
                     </Button>
                   </div>
-                  <div className="text-xs text-gray-500">
-                    {timeLeft > 0 && !emailVerified ? (
-                      <span>인증번호 유효시간: {formatTime(timeLeft)}</span>
-                    ) : (
-                      <span className="text-red-500">
-                        인증번호가 만료되었습니다. 다시 전송해주세요.
-                      </span>
-                    )}
-                  </div>
                 </div>
               )}
             </div>
